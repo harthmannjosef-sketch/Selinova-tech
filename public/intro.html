@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELINOVA-TECH – Intro</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  #canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+
+  #hud {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .hud-text {
+    position: absolute;
+    font-family: 'Rajdhani', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: #00f5ff88;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 1s ease 1.5s;
+  }
+  .hud-text.show { opacity: 1; }
+  .ht-tl { top: 24px; left: 28px; }
+  .ht-tr { top: 24px; right: 28px; text-align: right; }
+  .ht-bl { bottom: 24px; left: 28px; }
+  .ht-br { bottom: 24px; right: 28px; text-align: right; }
+
+  #intro {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .logo-wrap {
+    position: relative;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.5) translateY(60px);
+    transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .logo-wrap.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  .logo-title {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: clamp(2rem, 6vw, 5.2rem);
+    letter-spacing: 0.18em;
+    background: linear-gradient(135deg, #00f5ff 0%, #ffffff 40%, #a855f7 70%, #00f5ff 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s ease infinite;
+    position: relative;
+    line-height: 1.1;
+  }
+
+  .logo-title-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: clamp(2rem, 6vw, 5.2rem);
+    letter-spacing: 0.18em;
+    color: #00f5ff;
+    filter: blur(22px);
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: -1;
+    line-height: 1.1;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50%       { background-position: 100% 50%; }
+  }
+
+  .divider {
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00f5ff, #a855f7, transparent);
+    margin: 1rem auto;
+    transition: width 1s ease 0.4s;
+  }
+  .divider.show { width: min(380px, 80vw); }
+
+  .logo-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    letter-spacing: 0.5em;
+    color: #00f5ff;
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+    opacity: 0;
+    transition: opacity 1s ease 0.6s;
+  }
+  .logo-sub.show { opacity: 0.85; }
+
+  .tagline {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(0.7rem, 1.6vw, 0.95rem);
+    letter-spacing: 0.28em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    margin-top: 0.6rem;
+    opacity: 0;
+    transition: opacity 1.2s ease 1s;
+  }
+  .tagline.show { opacity: 1; }
+
+  /* Corner brackets */
+  .corner {
+    position: absolute;
+    width: 30px; height: 30px;
+    border-color: #00f5ff;
+    border-style: solid;
+    opacity: 0;
+    transition: opacity 0.6s ease 1.2s;
+  }
+  .corner.show { opacity: 0.7; }
+  .corner.tl { top: 6px;  left: 6px;  border-width: 2px 0 0 2px; }
+  .corner.tr { top: 6px;  right: 6px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 6px; left: 6px;  border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00f5ff80, #00f5ff, #00f5ff80, transparent);
+    box-shadow: 0 0 14px #00f5ff;
+    animation: scan 2.8s ease-in-out infinite;
+    top: 0;
+    pointer-events: none;
+  }
+  @keyframes scan {
+    0%   { top: 0%;   opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* CTA */
+  #cta {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: clamp(40px, 8vh, 90px);
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.9s ease;
+  }
+  #cta.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .cta-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(0.6rem, 1.4vw, 0.8rem);
+    letter-spacing: 0.22em;
+    padding: 15px 44px;
+    background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(168,85,247,0.1));
+    border: 1px solid rgba(0,245,255,0.5);
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    border-radius: 2px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,245,255,0.15), transparent);
+    transition: left 0.5s;
+  }
+  .cta-btn:hover::before { left: 100%; }
+  .cta-btn:hover {
+    background: linear-gradient(135deg, rgba(0,245,255,0.2), rgba(168,85,247,0.2));
+    border-color: #00f5ff;
+    box-shadow: 0 0 28px rgba(0,245,255,0.3), 0 0 60px rgba(0,245,255,0.1);
+  }
+
+  .cta-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  #skip-btn {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 7px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    z-index: 10;
+    transition: all 0.3s;
+    opacity: 0;
+    border-radius: 2px;
+  }
+  #skip-btn:hover { color: #fff; border-color: rgba(0,245,255,0.5); }
+  #skip-btn.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- HUD overlay -->
+<div id="hud">
+  <div class="hud-text ht-tl" id="hudTL">SYS.ONLINE // v4.1.0</div>
+  <div class="hud-text ht-tr" id="hudTR">SELINOVA-TECH // SECURE</div>
+  <div class="hud-text ht-bl" id="hudBL">APK MODULE LOADED</div>
+  <div class="hud-text ht-br" id="hudBR">STATUS: AKTIV</div>
+</div>
+
+<!-- Main logo -->
+<div id="intro">
+  <div class="logo-wrap" id="logoWrap">
+    <div class="corner tl" id="cTL"></div>
+    <div class="corner tr" id="cTR"></div>
+    <div class="corner bl" id="cBL"></div>
+    <div class="corner br" id="cBR"></div>
+    <div class="scan-line"></div>
+
+    <div style="position:relative; padding: clamp(40px,8vh,80px) clamp(30px,8vw,100px) clamp(30px,6vh,60px);">
+      <div style="position:relative;">
+        <div class="logo-title-glow" aria-hidden="true">SELINOVA-TECH</div>
+        <div class="logo-title">SELINOVA-TECH</div>
+      </div>
+      <div class="divider" id="divider"></div>
+      <div class="logo-sub" id="logoSub">Webseiten kaufen &amp; mieten</div>
+      <div class="tagline" id="tagline">E-Commerce &nbsp;·&nbsp; SaaS &nbsp;·&nbsp; Blogs &nbsp;·&nbsp; Apps</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div id="cta">
+  <a class="cta-btn" href="/" onclick="goToApp(event)">JETZT ENTDECKEN</a>
+  <div class="cta-sub">www.selinova-tech.at</div>
+</div>
+
+<button id="skip-btn" onclick="triggerCTA()">ÜBERSPRINGEN ›</button>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x = init ? Math.random() * W : (Math.random() > 0.5 ? 0 : W);
+    this.y = init ? Math.random() * H : Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.45;
+    this.vy = (Math.random() - 0.5) * 0.45;
+    this.size = Math.random() * 1.6 + 0.4;
+    this.alpha = Math.random() * 0.55 + 0.1;
+    this.hue = Math.random() > 0.55 ? 187 : 272;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < -5 || this.x > W + 5 || this.y < -5 || this.y > H + 5) this.reset(false);
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = `hsl(${this.hue}, 100%, 70%)`;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 160; i++) particles.push(new Particle());
+
+function drawGrid() {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,245,255,0.035)';
+  ctx.lineWidth = 0.5;
+  const sp = 65;
+  for (let x = 0; x < W; x += sp) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += sp) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawNebula() {
+  const cx = W * 0.5, cy = H * 0.5;
+  const r = Math.min(W, H) * 0.6;
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0,   'rgba(168, 85, 247, 0.13)');
+  g.addColorStop(0.45,'rgba(0, 245, 255, 0.07)');
+  g.addColorStop(1,   'transparent');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawOrbitals() {
+  const cx = W * 0.5, cy = H * 0.5;
+  const ts = Date.now() / 1000;
+  const base = Math.min(W, H);
+  const rings = [
+    { r: base * 0.38, speed:  0.15, color: 'rgba(0,245,255,0.20)',   sides: 6 },
+    { r: base * 0.46, speed: -0.09, color: 'rgba(168,85,247,0.15)',  sides: 6 },
+    { r: base * 0.55, speed:  0.05, color: 'rgba(0,245,255,0.08)',   sides: 6 },
+  ];
+  rings.forEach(o => {
+    ctx.save();
+    ctx.strokeStyle = o.color;
+    ctx.lineWidth = 0.8;
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    for (let i = 0; i <= o.sides; i++) {
+      const a = (i / o.sides) * Math.PI * 2 + ts * o.speed;
+      const x = cx + o.r * Math.cos(a);
+      const y = cy + o.r * Math.sin(a);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+function drawConnections() {
+  const near = 110;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < near) {
+        ctx.save();
+        ctx.globalAlpha = (1 - d / near) * 0.13;
+        ctx.strokeStyle = '#00f5ff';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  ctx.fillStyle = '#000008';
+  ctx.fillRect(0, 0, W, H);
+  drawGrid();
+  drawNebula();
+  drawOrbitals();
+  drawConnections();
+  particles.forEach(p => { p.update(); p.draw(); });
+}
+animate();
+
+let ctaShown = false;
+
+function triggerCTA() {
+  if (ctaShown) return;
+  ctaShown = true;
+  document.getElementById('cta').classList.add('show');
+  document.getElementById('skip-btn').style.display = 'none';
+}
+
+function goToApp(e) {
+  e.preventDefault();
+  window.location.href = '/';
+}
+
+// Sequence
+setTimeout(() => {
+  document.getElementById('logoWrap').classList.add('show');
+  document.querySelectorAll('.corner').forEach(c => c.classList.add('show'));
+}, 300);
+
+setTimeout(() => document.getElementById('divider').classList.add('show'), 900);
+
+setTimeout(() => {
+  document.getElementById('logoSub').classList.add('show');
+  document.getElementById('tagline').classList.add('show');
+}, 1100);
+
+setTimeout(() => {
+  document.querySelectorAll('.hud-text').forEach(h => h.classList.add('show'));
+}, 1500);
+
+setTimeout(() => document.getElementById('skip-btn').classList.add('visible'), 800);
+
+setTimeout(() => triggerCTA(), 3800);
+</script>
+</body>
+</html>
