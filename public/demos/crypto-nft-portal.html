@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoNFT Hub – Community Portal (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .nft-card { transition: transform .2s, box-shadow .2s; }
+    .nft-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3); }
+    .wallet-btn { transition: all .2s; }
+    .gated { filter: blur(1px); opacity: .6; pointer-events: none; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <nav class="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-400 via-violet-400 to-fuchsia-500 flex items-center justify-center"><i class="fa-solid fa-gem text-black"></i></div>
+        <div class="font-semibold text-xl tracking-tight">CryptoNFT Hub</div>
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex gap-4 text-sm">
+        <button onclick="showGallery()" class="hover:text-violet-400">Gallery</button>
+        <button onclick="showMarket()" class="hover:text-violet-400">Market</button>
+        <button onclick="showCommunity()" class="hover:text-violet-400">Community</button>
+        <button onclick="showAdmin()" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs">Admin</button>
+      </div>
+      <button id="wallet-btn" onclick="connectWallet()" class="wallet-btn flex items-center gap-2 px-4 py-1.5 text-sm border border-violet-400/60 hover:bg-violet-950 rounded-2xl">
+        <i class="fa-solid fa-wallet"></i> <span id="wallet-text">Wallet verbinden</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <div class="uppercase tracking-[3px] text-xs text-violet-400">WEB3 • 18k Members • 22k MAU</div>
+        <h1 class="text-4xl font-semibold tracking-tighter">NFTs. Community. Token-Gated Access.</h1>
+      </div>
+      <div class="text-xs text-right">
+        <div>Floor: 0.42 ETH</div>
+        <div class="text-violet-400">Volume 24h: 184 ETH</div>
+      </div>
+    </div>
+
+    <div id="main-content"></div>
+  </div>
+
+  <!-- Mint Modal -->
+  <div id="mint-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-6" onclick="event.stopImmediatePropagation()">
+      <div class="font-semibold text-xl mb-1">NFT minten</div>
+      <div class="text-xs text-zinc-400 mb-4">Kosten: 0.08 ETH + Gas (Demo)</div>
+
+      <div class="space-y-3">
+        <div><label class="text-xs">Name / Title</label><input id="mint-name" value="Genesis #042" class="w-full bg-zinc-950 border border-zinc-700 px-3 py-2 rounded-2xl"></div>
+        <div><label class="text-xs">Beschreibung</label><input id="mint-desc" value="Limited 1/1 from the Genesis drop" class="w-full bg-zinc-950 border border-zinc-700 px-3 py-2 rounded-2xl"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs">Collection</label><select id="mint-coll" class="w-full bg-zinc-950 border border-zinc-700 px-3 py-2 rounded-2xl"><option>Genesis</option><option>Urban Legends</option><option>Pixel Rebels</option></select></div>
+          <div><label class="text-xs">Rarity</label><select id="mint-rarity" class="w-full bg-zinc-950 border border-zinc-700 px-3 py-2 rounded-2xl"><option>Legendary</option><option>Epic</option><option>Rare</option></select></div>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-5">
+        <button onclick="doMint()" class="flex-1 py-3 bg-violet-500 text-black font-semibold rounded-2xl">Mint NFT (0.08 ETH)</button>
+        <button onclick="closeMint()" class="px-5 border border-zinc-700 rounded-2xl">Abbrechen</button>
+      </div>
+      <div class="text-[10px] text-center mt-3 text-zinc-500">Demo: NFT wird deinem Wallet hinzugefügt und ist sofort in der Galerie sichtbar.</div>
+    </div>
+  </div>
+
+  <script>
+    let nfts = JSON.parse(localStorage.getItem('cn_nfts') || '[]');
+    let owned = JSON.parse(localStorage.getItem('cn_owned') || '[]');
+    let members = JSON.parse(localStorage.getItem('cn_members') || '[]');
+    let walletConnected = localStorage.getItem('cn_wallet') === 'true';
+    let walletAddr = localStorage.getItem('cn_wallet_addr') || '';
+
+    const defaultNFTs = [
+      {id:101, title:'Genesis #001', coll:'Genesis', rarity:'Legendary', price:1.8, owner:'0x4a2b...c9d1', img:'💎', desc:'First of the Genesis collection'},
+      {id:102, title:'Urban Legend #17', coll:'Urban Legends', rarity:'Epic', price:0.64, owner:'0x9f3e...a112', img:'🦊', desc:'Hand-painted 1/1'},
+      {id:103, title:'Pixel Rebel #008', coll:'Pixel Rebels', rarity:'Rare', price:0.29, owner:'0x11aa...bb77', img:'👾', desc:'8-bit homage'},
+      {id:104, title:'Genesis #019', coll:'Genesis', rarity:'Epic', price:0.91, owner:'0x4a2b...c9d1', img:'🌌', desc:'Midnight edition'},
+      {id:105, title:'Urban #42', coll:'Urban Legends', rarity:'Rare', price:0.33, owner:'0xdead...beef', img:'🏙️', desc:'Berlin nights'},
+    ];
+
+    function saveNFTs() { localStorage.setItem('cn_nfts', JSON.stringify(nfts)); }
+    function saveOwned() { localStorage.setItem('cn_owned', JSON.stringify(owned)); }
+    function saveMembers() { localStorage.setItem('cn_members', JSON.stringify(members)); }
+
+    function initData() {
+      if (nfts.length === 0) {
+        nfts = [...defaultNFTs];
+        saveNFTs();
+      }
+      if (members.length === 0) {
+        members = [
+          {addr:'0x4a2b...c9d1', joined:'2023-11', role:'OG', tokens:12},
+          {addr:'0x9f3e...a112', joined:'2024-02', role:'Member', tokens:4},
+          {addr:'0xdead...beef', joined:'2024-01', role:'Member', tokens:7},
+        ];
+        saveMembers();
+      }
+      if (owned.length === 0 && walletConnected) {
+        owned = [101, 104];
+        saveOwned();
+      }
+    }
+
+    function updateWalletUI() {
+      const btn = document.getElementById('wallet-btn');
+      const txt = document.getElementById('wallet-text');
+      if (walletConnected) {
+        txt.textContent = walletAddr || '0x4a2b...c9d1';
+        btn.classList.add('!border-violet-400', '!bg-violet-950');
+      } else {
+        txt.textContent = 'Wallet verbinden';
+        btn.classList.remove('!border-violet-400', '!bg-violet-950');
+      }
+    }
+
+    function connectWallet() {
+      if (walletConnected) {
+        // show holdings
+        showOwned();
+        return;
+      }
+      walletConnected = true;
+      walletAddr = '0x4a2b' + Math.floor(Math.random()*9000+1000) + '...c9d1';
+      localStorage.setItem('cn_wallet', 'true');
+      localStorage.setItem('cn_wallet_addr', walletAddr);
+      // give starter NFTs
+      if (owned.length === 0) owned = [101, 104];
+      saveOwned();
+      updateWalletUI();
+      alert('Wallet verbunden! 0.84 ETH Balance • Token-Gated Bereiche freigeschaltet.');
+      showGallery();
+    }
+
+    function disconnectWallet() {
+      walletConnected = false;
+      localStorage.removeItem('cn_wallet');
+      updateWalletUI();
+      showGallery();
+    }
+
+    function showGallery(filterColl = '', q = '') {
+      const main = document.getElementById('main-content');
+      let list = [...nfts];
+      if (filterColl) list = list.filter(n => n.coll === filterColl);
+      if (q) list = list.filter(n => n.title.toLowerCase().includes(q.toLowerCase()) || n.desc.toLowerCase().includes(q.toLowerCase()));
+
+      main.innerHTML = `
+        <div class="flex items-center gap-3 mb-4">
+          <input id="search-nft" placeholder="Suche NFTs..." oninput="filterGallery()" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-2xl px-4 py-2 text-sm">
+          <select id="coll-filter" onchange="filterGallery()" class="bg-zinc-900 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+            <option value="">Alle Collections</option>
+            <option value="Genesis">Genesis</option>
+            <option value="Urban Legends">Urban Legends</option>
+            <option value="Pixel Rebels">Pixel Rebels</option>
+          </select>
+          <button onclick="showMint()" class="px-5 py-2 bg-violet-500 hover:bg-violet-400 text-black font-medium rounded-2xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> <span>Mint</span></button>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="gallery-grid">
+          ${list.map(nft => `
+            <div class="nft-card bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer" onclick="showNFTDetail(${nft.id})">
+              <div class="h-44 bg-zinc-950 flex items-center justify-center text-7xl">${nft.img}</div>
+              <div class="p-4">
+                <div class="flex justify-between">
+                  <div class="font-semibold">${nft.title}</div>
+                  <div class="text-xs px-2 py-0.5 self-start rounded ${nft.rarity==='Legendary'?'bg-amber-400 text-black':nft.rarity==='Epic'?'bg-violet-400 text-black':'bg-zinc-700'}">${nft.rarity}</div>
+                </div>
+                <div class="text-xs text-zinc-400">${nft.coll}</div>
+                <div class="mt-3 flex items-center justify-between text-sm">
+                  <div><span class="font-semibold">${nft.price}</span> <span class="text-xs">ETH</span></div>
+                  <div class="text-xs text-zinc-400">${nft.owner}</div>
+                </div>
+              </div>
+              ${owned.includes(nft.id) ? '<div class="absolute top-3 right-3 bg-emerald-400 text-black text-[10px] px-2 rounded">OWNED</div>' : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="mt-6 flex justify-between text-xs text-zinc-500">
+          <div>18.420 Mitglieder • 1.842 NFTs minted • Floor 0.42 ETH</div>
+          <div onclick="showOwned()" class="cursor-pointer text-violet-400">Meine NFTs anzeigen →</div>
+        </div>
+      `;
+      // restore filter values if present
+      setTimeout(() => {
+        const sf = document.getElementById('search-nft'); if (sf) sf.value = q;
+        const cf = document.getElementById('coll-filter'); if (cf) cf.value = filterColl;
+      }, 10);
+    }
+
+    window.filterGallery = function() {
+      const q = document.getElementById('search-nft')?.value || '';
+      const coll = document.getElementById('coll-filter')?.value || '';
+      showGallery(coll, q);
+    };
+
+    function showNFTDetail(id) {
+      const nft = nfts.find(x => x.id === id);
+      if (!nft) return;
+      const isOwned = owned.includes(id);
+      const main = document.getElementById('main-content');
+      main.innerHTML = `
+        <button onclick="showGallery()" class="mb-4 text-sm text-violet-400">← Zurück zur Gallery</button>
+        <div class="grid lg:grid-cols-2 gap-8">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-10 flex items-center justify-center text-[160px] aspect-square">${nft.img}</div>
+          <div>
+            <div class="uppercase text-xs tracking-widest text-violet-400">${nft.coll}</div>
+            <div class="text-4xl font-semibold tracking-tighter">${nft.title}</div>
+            <div class="mt-1 text-sm text-zinc-400">${nft.desc}</div>
+
+            <div class="mt-6 flex items-center gap-3">
+              <div class="text-3xl font-semibold">${nft.price} <span class="text-base font-normal">ETH</span></div>
+              <div class="text-xs px-3 py-1 rounded ${nft.rarity==='Legendary'?'bg-amber-400 text-black':''}">${nft.rarity}</div>
+            </div>
+
+            <div class="mt-6">
+              ${isOwned ? 
+                `<div class="inline-flex items-center gap-2 text-emerald-400"><i class="fa-solid fa-check-circle"></i> <span>In deinem Wallet</span></div>` :
+                `<button onclick="buyNFT(${id})" class="mt-2 px-8 py-3 bg-violet-500 hover:bg-violet-400 text-black font-semibold rounded-2xl">Jetzt kaufen (Demo)</button>`
+              }
+              ${walletConnected ? `<button onclick="transferNFT(${id})" class="ml-2 px-4 py-3 border border-zinc-700 rounded-2xl text-sm">Transfer</button>` : ''}
+            </div>
+
+            <div class="mt-8 text-xs text-zinc-400">Owner: ${nft.owner} • Token ID: ${nft.id} • Smart Contract: 0xC1...f9a2</div>
+
+            <div class="mt-8 p-4 bg-zinc-950 rounded-2xl text-sm ${!walletConnected || !isOwned ? 'gated' : ''}">
+              <div class="text-violet-400 text-xs mb-1">TOKEN-GATED CONTENT</div>
+              <div>Exklusiver Discord-Role, IRL Event Tickets, Merch Drop, Private AMA-Aufzeichnungen.</div>
+              ${!walletConnected ? '<div class="mt-2 text-amber-400 text-xs">Wallet verbinden um freizuschalten.</div>' : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buyNFT(id) {
+      if (!walletConnected) { alert('Bitte zuerst Wallet verbinden.'); connectWallet(); return; }
+      const nft = nfts.find(x=>x.id===id);
+      if (owned.includes(id)) return alert('Bereits im Besitz.');
+      owned.push(id);
+      saveOwned();
+      alert(`Gekauft! ${nft.title} wurde zu deinem Wallet hinzugefügt.`);
+      showNFTDetail(id);
+    }
+
+    function transferNFT(id) {
+      const to = prompt('Empfänger Wallet Adresse (Demo):', '0x1234...abcd');
+      if (!to) return;
+      owned = owned.filter(x => x !== id);
+      saveOwned();
+      alert(`Transfer simuliert an ${to}.\nNFT wurde aus deinem Wallet entfernt.`);
+      showGallery();
+    }
+
+    function showMint() {
+      if (!walletConnected) {
+        if (!confirm('Wallet nicht verbunden. Trotzdem minten (Demo)?')) return;
+        connectWallet();
+      }
+      document.getElementById('mint-modal').classList.remove('hidden');
+      document.getElementById('mint-modal').classList.add('flex');
+    }
+
+    function closeMint() {
+      const m = document.getElementById('mint-modal');
+      m.classList.remove('flex'); m.classList.add('hidden');
+    }
+
+    function doMint() {
+      const name = document.getElementById('mint-name').value || 'New Drop';
+      const desc = document.getElementById('mint-desc').value || 'Community Mint';
+      const coll = document.getElementById('mint-coll').value;
+      const rarity = document.getElementById('mint-rarity').value;
+
+      const newNFT = {
+        id: Date.now(),
+        title: name,
+        coll, rarity,
+        price: (rarity==='Legendary'? 1.4 : rarity==='Epic'? 0.7 : 0.28),
+        owner: walletAddr || '0xYou...Wallet',
+        img: rarity==='Legendary' ? '👑' : rarity==='Epic' ? '🔥' : '🌀',
+        desc
+      };
+      nfts.unshift(newNFT);
+      owned.push(newNFT.id);
+      saveNFTs(); saveOwned();
+      closeMint();
+      alert('Minted! Dein neues NFT ist in der Galerie und deinem Wallet.');
+      showGallery();
+    }
+
+    function showMarket() {
+      const main = document.getElementById('main-content');
+      main.innerHTML = `
+        <div class="mb-4">Live Market (Demo)</div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="p-3 bg-zinc-950 rounded-2xl">Genesis #001 <span class="float-right text-violet-400">1.8 ETH</span></div>
+            <div class="p-3 bg-zinc-950 rounded-2xl">Urban #42 <span class="float-right text-violet-400">0.33 ETH</span></div>
+            <div class="p-3 bg-zinc-950 rounded-2xl">Pixel #008 <span class="float-right text-violet-400">0.29 ETH</span></div>
+          </div>
+          <div class="mt-4 text-xs text-zinc-400">Echter Produkt: On-Chain Orderbook, Dutch Auctions, Royalties 7.5%, OpenSea + Blur Sync.</div>
+        </div>
+      `;
+    }
+
+    function showCommunity() {
+      const main = document.getElementById('main-content');
+      main.innerHTML = `
+        <div class="grid lg:grid-cols-5 gap-6">
+          <div class="lg:col-span-3">
+            <div class="font-semibold mb-3">Community Feed</div>
+            <div class="space-y-3 text-sm">
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl">0x4a2b just minted Genesis #019 – "Midnight edition is 🔥"</div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl">AMA tomorrow 20:00 CET with the artist. Token holders only.</div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl">New drop "Pixel Rebels" sold out in 41 seconds.</div>
+            </div>
+          </div>
+          <div class="lg:col-span-2">
+            <div class="font-semibold mb-3">Members (${members.length} sichtbar)</div>
+            <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-2 text-sm">
+              ${members.map(m => `
+                <div class="flex justify-between px-3 py-1.5 border-b border-zinc-800 last:border-none">
+                  <div>${m.addr} <span class="text-xs text-violet-400">${m.role}</span></div>
+                  <div class="text-xs">${m.tokens} NFTs</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="text-[10px] mt-2">Discord • 14.2k online • Token-Gating aktiv</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function showOwned() {
+      const main = document.getElementById('main-content');
+      const my = nfts.filter(n => owned.includes(n.id));
+      main.innerHTML = `
+        <button onclick="showGallery()" class="mb-3 text-violet-400 text-sm">← Gallery</button>
+        <div class="font-semibold mb-3">Deine NFTs (${my.length})</div>
+        ${my.length === 0 ? '<div class="text-sm">Noch keine NFTs. Verbinde Wallet oder kaufe/minte welche.</div>' : `
+          <div class="grid md:grid-cols-3 gap-4">
+            ${my.map(n => `
+              <div onclick="showNFTDetail(${n.id})" class="nft-card bg-zinc-900 border border-emerald-800 rounded-3xl p-4 cursor-pointer">
+                <div class="text-5xl mb-2">${n.img}</div>
+                <div class="font-medium">${n.title}</div>
+                <div class="text-xs text-zinc-400">${n.coll}</div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      `;
+    }
+
+    // ============ ADMIN ============
+    function showAdmin() {
+      const main = document.getElementById('main-content');
+      const totalVol = nfts.reduce((s,n)=>s + n.price, 0).toFixed(2);
+      main.innerHTML = `
+        <div class="text-xs text-violet-400 tracking-widest">CREATOR / DAO ADMIN • SOVEREIGNTY</div>
+        <div class="text-2xl font-semibold mb-5">CryptoNFT Hub Admin</div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-zinc-900 p-4 rounded-3xl"><div class="text-xs">Total Volume (Demo)</div><div class="text-3xl font-semibold">${totalVol} ETH</div></div>
+          <div class="bg-zinc-900 p-4 rounded-3xl"><div class="text-xs">Members</div><div class="text-3xl font-semibold">${members.length + 18200}</div></div>
+          <div class="bg-zinc-900 p-4 rounded-3xl"><div class="text-xs">NFTs im System</div><div class="text-3xl font-semibold">${nfts.length}</div></div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="flex justify-between mb-3"><span class="font-medium">NFTs verwalten</span> <button onclick="adminAddNFT()" class="text-xs px-3 py-1 border border-zinc-700 rounded">+ NFT</button></div>
+            <div class="max-h-72 overflow-auto text-sm space-y-1">
+              ${nfts.slice(0,8).map((n,i) => `
+                <div class="flex justify-between items-center bg-zinc-950 px-3 py-1.5 rounded-xl">
+                  <div>${n.title} <span class="text-xs text-zinc-400">(${n.coll})</span></div>
+                  <div class="flex gap-2 text-xs">
+                    <button onclick="adminEditNFT(${n.id})" class="text-violet-400">Edit</button>
+                    <button onclick="adminDeleteNFT(${n.id})" class="text-red-400">Del</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Members &amp; Revenue</div>
+            <div class="text-sm space-y-1 mb-3">
+              ${members.map((m,i) => `
+                <div class="flex gap-2 bg-zinc-950 px-3 py-1 rounded-xl items-center">
+                  <div class="flex-1">${m.addr}</div>
+                  <input value="${m.tokens}" onchange="updateMemberTokens(${i},this.value)" class="w-10 bg-black text-center border border-zinc-700 rounded text-xs">
+                  <button onclick="removeMember(${i})" class="text-red-400 text-xs">×</button>
+                </div>
+              `).join('')}
+            </div>
+            <button onclick="addMember()" class="text-xs border border-zinc-700 px-3 py-1 rounded-xl">+ Member hinzufügen</button>
+
+            <div class="mt-5 text-xs border-t border-zinc-700 pt-3">Revenue aus Mint + Secondary: <span class="font-semibold">12.4 ETH</span> (letzte 30d)</div>
+          </div>
+        </div>
+        <div class="mt-4 text-[10px] text-center text-zinc-500">Vollständiger Betrieb für den Käufer: Uploads, Royalties, Gating, Discord Bot Integration, Analytics.</div>
+      `;
+    }
+
+    function adminAddNFT() {
+      const title = prompt('NFT Title:', 'New Drop #001');
+      if (!title) return;
+      const coll = prompt('Collection:', 'Genesis');
+      const newOne = {id:Date.now(), title, coll, rarity:'Rare', price:0.5, owner:'0xAdmin', img:'🆕', desc:'Admin minted'};
+      nfts.unshift(newOne);
+      saveNFTs();
+      showAdmin();
+    }
+
+    function adminEditNFT(id) {
+      const nft = nfts.find(x=>x.id===id);
+      const newTitle = prompt('Title:', nft.title);
+      if (newTitle) nft.title = newTitle;
+      saveNFTs();
+      showAdmin();
+    }
+
+    function adminDeleteNFT(id) {
+      if (confirm('NFT löschen?')) {
+        nfts = nfts.filter(x=>x.id!==id);
+        owned = owned.filter(x=>x!==id);
+        saveNFTs(); saveOwned();
+        showAdmin();
+      }
+    }
+
+    function updateMemberTokens(i, val) {
+      members[i].tokens = parseInt(val)||0;
+      saveMembers();
+    }
+
+    function addMember() {
+      const addr = prompt('Wallet / Handle:', '0xnew...user');
+      if (!addr) return;
+      members.push({addr, joined:'2026-06', role:'Member', tokens:1});
+      saveMembers();
+      showAdmin();
+    }
+
+    function removeMember(i) {
+      if (confirm('Member entfernen?')) { members.splice(i,1); saveMembers(); showAdmin(); }
+    }
+
+    function init() {
+      initData();
+      updateWalletUI();
+      showGallery();
+      console.log('%c[CryptoNFT Hub] Full web3 community portal: gallery, mint, buy/transfer, wallet mock, token-gating, community, complete Admin (CRUD NFTs + members + revenue). Sovereign ready-to-run.', 'color:#64748b');
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>

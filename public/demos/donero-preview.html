@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DÖNERO – Punjab Döner | Live Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Syne:wght@600;700&amp;display=swap');
+    :root {
+      --primary: #f59e0b;
+    }
+    body { font-family: 'Inter', system_ui, sans-serif; }
+    .title-font { font-family: 'Syne', system_ui, sans-serif; }
+    
+    .doner-wheel {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      position: relative;
+      background: conic-gradient(
+        #f59e0b 0deg 45deg,
+        #10b981 45deg 90deg,
+        #3b82f6 90deg 135deg,
+        #8b5cf6 135deg 180deg,
+        #ef4444 180deg 225deg,
+        #f59e0b 225deg 270deg,
+        #10b981 270deg 315deg,
+        #3b82f6 315deg 360deg
+      );
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 0 60px rgba(255,255,255,0.15);
+      transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+      border: 12px solid #1f2937;
+    }
+    
+    .wheel-segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .wheel-pointer {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 28px solid #ef4444;
+      z-index: 10;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    }
+    
+    .menu-item {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .menu-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+    
+    .preview-container {
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+      border: 1px solid #374151;
+    }
+    
+    .section-header {
+      font-family: 'Syne', system_ui, sans-serif;
+      letter-spacing: -0.025em;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <!-- Top Nav -->
+  <nav class="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-inner">D</div>
+        <div>
+          <div class="font-semibold text-xl tracking-tight">DÖNERO</div>
+          <div class="text-[10px] text-zinc-500 -mt-1">by Punjab Döner</div>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-4 text-sm">
+        <div class="hidden md:flex items-center gap-2 text-zinc-400">
+          <i class="fa-solid fa-map-marker-alt text-emerald-400"></i>
+          <span>28 Filialen • Berlin &amp; Brandenburg</span>
+        </div>
+        <button onclick="showLocationModal()" 
+                class="px-4 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-sm flex items-center gap-2 transition-colors">
+          <i class="fa-solid fa-store"></i>
+          <span class="hidden sm:inline">Filiale wählen</span>
+        </button>
+        <div class="flex items-center gap-2 bg-zinc-900 rounded-2xl px-1 py-1 border border-zinc-800">
+          <div class="w-8 h-8 bg-zinc-800 rounded-xl overflow-hidden">
+            <img src="https://picsum.photos/id/1011/32/32" class="w-full h-full object-cover" alt="User">
+          </div>
+          <div class="pr-3">
+            <div class="text-xs leading-none">Alex M.</div>
+            <div class="text-[10px] text-emerald-400">2.340 Punkte</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-6 pt-8 pb-16">
+    <!-- Hero -->
+    <div class="grid md:grid-cols-12 gap-8 items-center">
+      <div class="md:col-span-7">
+        <div class="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1 text-xs tracking-widest mb-4">
+          <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span>NEU: Wheel v2.1 live</span>
+        </div>
+        
+        <h1 class="text-6xl md:text-7xl font-semibold tracking-tighter title-font leading-none mb-3">
+          Dein Döner.<br>
+          <span class="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Dein Wheel.</span>
+        </h1>
+        <p class="text-sm text-amber-400 mb-1">Die Döner-Version des PIZZA-WHEEL Konzepts</p>
+        
+        <p class="max-w-md text-xl text-zinc-400 mb-8">
+          Der interaktive Wheel-Selector für den perfekten Punjab Döner. 
+          Schnell bestellen. Punkte sammeln. Exklusive Deals.
+        </p>
+        
+        <div class="flex items-center gap-3">
+          <button onclick="scrollToWheel()" 
+                  class="px-8 py-3.5 bg-white text-black font-semibold rounded-2xl hover:bg-amber-100 transition flex items-center gap-3 shadow-lg shadow-amber-900/20">
+            <span>Jetzt Wheel drehen</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button onclick="window.open('#menu', '_self')" 
+                  class="px-6 py-3.5 border border-zinc-700 hover:bg-zinc-900 rounded-2xl flex items-center gap-2 text-sm font-medium transition">
+            <i class="fa-solid fa-list"></i>
+            <span>Menü ansehen</span>
+          </button>
+        </div>
+        
+        <div class="flex items-center gap-4 mt-6 text-xs text-zinc-500">
+          <div class="flex -space-x-1">
+            <div class="w-5 h-5 bg-zinc-700 rounded-full ring-1 ring-zinc-950 overflow-hidden"><img src="https://picsum.photos/id/1005/20/20" class="w-full h-full object-cover"></div>
+            <div class="w-5 h-5 bg-zinc-700 rounded-full ring-1 ring-zinc-950 overflow-hidden"><img src="https://picsum.photos/id/1012/20/20" class="w-full h-full object-cover"></div>
+            <div class="w-5 h-5 bg-zinc-700 rounded-full ring-1 ring-zinc-950 overflow-hidden"><img src="https://picsum.photos/id/1009/20/20" class="w-full h-full object-cover"></div>
+          </div>
+          <span>12.4k Bestellungen diese Woche</span>
+        </div>
+      </div>
+      
+      <div class="md:col-span-5">
+        <div class="relative">
+          <img src="/images/offers/donero-desktop.jpg" 
+               class="rounded-3xl shadow-2xl border border-zinc-800 w-full" 
+               alt="DÖNERO Desktop Screenshot">
+          <div class="absolute -bottom-3 -right-3 bg-zinc-900 border border-zinc-700 rounded-2xl px-4 py-2 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-check-circle text-emerald-400"></i>
+            <span class="font-medium">4.98 / 5 • 8.421 Bewertungen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Wheel - Main Feature -->
+    <div id="wheel-section" class="mt-16 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <div class="uppercase tracking-[2px] text-xs text-amber-400 font-semibold">Signature Feature</div>
+          <h2 class="text-4xl font-semibold tracking-tighter title-font">Der Döner Wheel</h2>
+          <p class="text-zinc-400 mt-1">Dreh das Rad und entdecke deine perfekte Kombination</p>
+        </div>
+        <button onclick="spinWheel()" 
+                class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold rounded-2xl flex items-center gap-3 transition shadow-lg active:scale-[0.985]">
+          <i class="fa-solid fa-sync fa-fw"></i>
+          <span class="font-semibold">Wheel drehen</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-8 items-center">
+        <!-- Wheel -->
+        <div class="relative flex-shrink-0" style="width: 300px; height: 300px;">
+          <div id="wheel" class="doner-wheel mx-auto" style="transform: rotate(0deg);">
+            <!-- Segments are styled via conic-gradient in CSS -->
+          </div>
+          <div class="wheel-pointer"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-14 h-14 bg-zinc-900 rounded-full border-4 border-zinc-700 flex items-center justify-center text-2xl shadow-inner">🌯</div>
+          </div>
+        </div>
+
+        <div class="flex-1 w-full">
+          <div class="grid grid-cols-2 gap-3 text-sm" id="wheel-result">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+              <div class="text-emerald-400 text-xs tracking-wider">DEINE WAHL</div>
+              <div id="wheel-choice" class="font-semibold text-xl mt-1 text-white">Dreh das Rad!</div>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+              <div class="text-emerald-400 text-xs tracking-wider">BONUS</div>
+              <div id="wheel-bonus" class="font-semibold text-xl mt-1">—</div>
+            </div>
+          </div>
+          
+          <div class="mt-4 text-xs text-zinc-400">
+            Der Wheel berücksichtigt deine bisherigen Bestellungen und aktuelle Angebote in der Filiale.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Menu -->
+    <div id="menu" class="mt-12">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-2xl font-semibold tracking-tight">Beliebte Döner</h3>
+        <button onclick="addPopularToCart()" class="text-sm flex items-center gap-2 text-amber-400 hover:text-amber-300">
+          <span>Alle in den Warenkorb</span> <i class="fa-solid fa-cart-plus"></i>
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Menu items -->
+        <div onclick="addToCart('Klassik Döner', 6.90)" class="menu-item bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-3xl p-4 cursor-pointer flex gap-4">
+          <div class="w-16 h-16 bg-orange-900/60 rounded-2xl flex-shrink-0 overflow-hidden">
+            <img src="https://picsum.photos/id/292/64/64" class="w-full h-full object-cover" alt="Klassik Döner">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between">
+              <div class="font-semibold">Klassik Döner</div>
+              <div class="font-mono text-sm">€6.90</div>
+            </div>
+            <div class="text-xs text-zinc-400 line-clamp-2">Rind, Salat, Tomate, Zwiebel, Kraut, Joghurt-Sauce</div>
+            <div class="text-[10px] mt-2 text-emerald-400">⭐ 4.9 (3.2k)</div>
+          </div>
+        </div>
+        
+        <div onclick="addToCart('Scharfer Punjab', 7.90)" class="menu-item bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-3xl p-4 cursor-pointer flex gap-4">
+          <div class="w-16 h-16 bg-red-900/60 rounded-2xl flex-shrink-0 overflow-hidden">
+            <img src="https://picsum.photos/id/312/64/64" class="w-full h-full object-cover" alt="Scharfer Punjab">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between">
+              <div class="font-semibold">Scharfer Punjab</div>
+              <div class="font-mono text-sm">€7.90</div>
+            </div>
+            <div class="text-xs text-zinc-400 line-clamp-2">Hähnchen, scharfe Chili, Zwiebel, Knoblauch, Harissa</div>
+            <div class="text-[10px] mt-2 text-emerald-400">⭐ 4.8 (2.1k)</div>
+          </div>
+        </div>
+        
+        <div onclick="addToCart('Veggie Wheel', 7.50)" class="menu-item bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-3xl p-4 cursor-pointer flex gap-4">
+          <div class="w-16 h-16 bg-emerald-900/60 rounded-2xl flex-shrink-0 overflow-hidden">
+            <img src="https://picsum.photos/id/201/64/64" class="w-full h-full object-cover" alt="Veggie Wheel">
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between">
+              <div class="font-semibold">Veggie Wheel</div>
+              <div class="font-mono text-sm">€7.50</div>
+            </div>
+            <div class="text-xs text-zinc-400 line-clamp-2">Falafel, Halloumi, viel Gemüse, Sesam-Joghurt</div>
+            <div class="text-[10px] mt-2 text-emerald-400">⭐ 4.7 (1.8k)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart -->
+    <div class="mt-10 max-w-md ml-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+      <div class="flex justify-between items-center mb-4">
+        <div class="font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-shopping-cart"></i> 
+          <span>Dein Warenkorb</span>
+        </div>
+        <div id="cart-total" class="font-mono text-xl font-semibold">€0.00</div>
+      </div>
+      
+      <div id="cart-items" class="text-sm space-y-2 mb-4 min-h-[60px]">
+        <div class="text-zinc-400 text-xs">Noch keine Artikel. Wähle aus dem Menü oder drehe das Wheel.</div>
+      </div>
+      
+      <button onclick="checkout()" 
+              class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 transition text-white rounded-2xl font-semibold flex items-center justify-center gap-2">
+        <span>Zur Kasse</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <div class="text-center text-[10px] text-zinc-500 mt-2">Lieferung in 18 Min • 4,2 km entfernt</div>
+    </div>
+  </div>
+
+  <script>
+    // Tailwind script
+    function initTailwind() {
+      // Already loaded via CDN
+    }
+    
+    let cart = [];
+    
+    function updateCart() {
+      const container = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+      
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="text-zinc-400 text-xs">Noch keine Artikel. Wähle aus dem Menü oder drehe das Wheel.</div>';
+        totalEl.textContent = '€0.00';
+        return;
+      }
+      
+      let html = '';
+      let total = 0;
+      
+      cart.forEach((item, index) => {
+        total += item.price;
+        html += `
+          <div class="flex justify-between items-center bg-zinc-950 px-3 py-2 rounded-xl">
+            <div class="flex items-center gap-2">
+              <span>${item.name}</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <span class="font-mono">€${item.price.toFixed(2)}</span>
+              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-500 text-xs px-1">×</button>
+            </div>
+          </div>`;
+      });
+      
+      container.innerHTML = html;
+      totalEl.textContent = `€${total.toFixed(2)}`;
+    }
+    
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCart();
+      
+      // Toast
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-2xl text-sm shadow flex items-center gap-2`;
+      toast.innerHTML = `<span>${name} hinzugefügt</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 1600);
+    }
+    
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+    
+    function addPopularToCart() {
+      cart = [
+        { name: 'Klassik Döner', price: 6.90 },
+        { name: 'Scharfer Punjab', price: 7.90 }
+      ];
+      updateCart();
+    }
+    
+    // THE WHEEL - Interactive spinning wheel (Pizza-Wheel style for Döner)
+    let currentRotation = 0;
+    
+    function spinWheel() {
+      const wheel = document.getElementById('wheel');
+      const choiceEl = document.getElementById('wheel-choice');
+      const bonusEl = document.getElementById('wheel-bonus');
+      
+      // Random spin: 3 to 6 full rotations + random angle
+      const extraSpins = 3 + Math.random() * 3;
+      const randomAngle = Math.floor(Math.random() * 360);
+      const targetRotation = currentRotation + (extraSpins * 360) + randomAngle;
+      
+      wheel.style.transition = 'transform 3.8s cubic-bezier(0.22, 1, 0.36, 1)';
+      wheel.style.transform = `rotate(${targetRotation}deg)`;
+      
+      // Determine result based on final angle
+      setTimeout(() => {
+        currentRotation = targetRotation % 360;
+        
+        const segment = Math.floor((currentRotation % 360) / 45);
+        const options = [
+          { name: 'Extra Schafskäse', bonus: '+1.20€' },
+          { name: 'Scharf + Chili', bonus: 'Gratis' },
+          { name: 'Double Fleisch', bonus: '+2.50€' },
+          { name: 'Vollkorn Wrap', bonus: 'Gratis' },
+          { name: 'Extra Soße', bonus: 'Gratis' },
+          { name: 'Pommes Beilage', bonus: '+1.90€' },
+          { name: 'Knoblauch-Upgrade', bonus: 'Gratis' },
+          { name: 'Loyalty 50 Punkte', bonus: 'Sofort' }
+        ];
+        
+        const result = options[segment];
+        
+        choiceEl.textContent = result.name;
+        bonusEl.textContent = result.bonus;
+        bonusEl.className = result.bonus.includes('Gratis') || result.bonus.includes('Punkte') 
+          ? 'font-semibold text-xl mt-1 text-emerald-400' 
+          : 'font-semibold text-xl mt-1 text-amber-400';
+        
+        // Auto add a related item to cart as "experience"
+        if (Math.random() > 0.4) {
+          const cartName = result.name.includes('Fleisch') ? 'Scharfer Punjab' : 'Klassik Döner';
+          const cartPrice = result.name.includes('Fleisch') ? 7.90 : 6.90;
+          cart.push({ name: cartName + ' (Wheel)', price: cartPrice });
+          updateCart();
+        }
+        
+        // Nice feedback
+        wheel.style.transition = 'transform 0.3s ease';
+      }, 4000);
+    }
+    
+    function scrollToWheel() {
+      document.getElementById('wheel-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const wheel = document.getElementById('wheel');
+        wheel.style.transform = `rotate(${currentRotation + 120}deg)`;
+        setTimeout(() => spinWheel(), 650);
+      }, 900);
+    }
+    
+    function showLocationModal() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[100]';
+      modal.innerHTML = `
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-sm mx-4">
+          <div class="font-semibold mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-store"></i> 
+            <span>Filiale auswählen</span>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div onclick="selectLocation(this, 'Kreuzberg • 1.2km')" class="cursor-pointer flex justify-between items-center px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-2xl">
+              <div>Punjab Döner Kreuzberg</div>
+              <div class="text-xs px-2 py-px bg-emerald-900 text-emerald-400 rounded">Sofort</div>
+            </div>
+            <div onclick="selectLocation(this, 'Mitte • 3.4km')" class="cursor-pointer flex justify-between items-center px-4 py-3 hover:bg-zinc-800 rounded-2xl">
+              <div>Punjab Döner Mitte</div>
+              <div class="text-xs px-2 py-px bg-zinc-700 rounded">12 Min</div>
+            </div>
+            <div onclick="selectLocation(this, 'Neukölln • 4.8km')" class="cursor-pointer flex justify-between items-center px-4 py-3 hover:bg-zinc-800 rounded-2xl">
+              <div>Punjab Döner Neukölln</div>
+              <div class="text-xs px-2 py-px bg-zinc-700 rounded">19 Min</div>
+            </div>
+          </div>
+          <button onclick="this.closest('.fixed').remove()" class="mt-4 w-full text-sm py-2 text-zinc-400 hover:text-zinc-300">Abbrechen</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    function selectLocation(el, info) {
+      const modal = el.closest('.fixed');
+      modal.remove();
+      
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 left-1/2 -translate-x-1/2 bg-zinc-800 border border-zinc-700 px-5 py-2.5 rounded-2xl text-sm flex items-center gap-2 shadow-xl`;
+      toast.innerHTML = `<span>Filiale geändert: ${info}</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2200);
+    }
+    
+    function checkout() {
+      if (cart.length === 0) {
+        alert('Dein Warenkorb ist leer. Bitte wähle etwas aus.');
+        return;
+      }
+      
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[120]';
+      const total = cart.reduce((sum, i) => sum + i.price, 0);
+      
+      modal.innerHTML = `
+        <div class="bg-zinc-900 border-t md:border border-zinc-700 w-full md:w-[420px] md:rounded-3xl p-6 md:m-4">
+          <div class="flex justify-between mb-4">
+            <div class="font-semibold">Bestellung abschließen</div>
+            <button onclick="this.closest('.fixed').remove()" class="text-zinc-400 text-xl leading-none">&times;</button>
+          </div>
+          
+          <div class="text-sm space-y-1 mb-5">
+            ${cart.map(i => `<div class="flex justify-between"><span>${i.name}</span><span class="font-mono">€${i.price.toFixed(2)}</span></div>`).join('')}
+            <div class="border-t border-zinc-700 pt-2 mt-2 flex justify-between font-semibold">
+              <span>Gesamt</span> <span class="font-mono">€${total.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-zinc-400">Lieferadresse</label>
+              <div class="mt-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm">Oranienstraße 45, 10969 Berlin</div>
+            </div>
+            
+            <button onclick="completeOrder(this)" 
+                    class="w-full py-3.5 bg-white active:bg-zinc-100 transition text-black font-semibold rounded-2xl flex items-center justify-center gap-2">
+              <span>Jetzt bezahlen &amp; bestellen</span>
+            </button>
+            
+            <div class="text-center text-xs text-zinc-500">Zahlung per Apple Pay / Google Pay / Karte</div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    function completeOrder(btn) {
+      btn.innerHTML = `<span class="flex items-center gap-2"><i class="fa-solid fa-check"></i> Bestellung bestätigt!</span>`;
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        const modal = btn.closest('.fixed');
+        if (modal) modal.remove();
+        
+        // Success experience
+        const success = document.createElement('div');
+        success.className = `fixed inset-0 flex items-center justify-center bg-black/80 z-[200]`;
+        success.innerHTML = `
+          <div class="text-center px-6">
+            <div class="text-6xl mb-4">🎉</div>
+            <div class="text-3xl font-semibold mb-1">Danke für deine Bestellung!</div>
+            <div class="text-zinc-400 mb-6">Dein Döner ist in ca. 18 Minuten bei dir.<br>Tracke deine Bestellung in der App.</div>
+            
+            <button onclick="window.location.reload()" 
+                    class="px-8 py-2.5 bg-white text-sm font-medium text-black rounded-2xl">Zurück zum Marktplatz</button>
+          </div>
+        `;
+        document.body.appendChild(success);
+      }, 1250);
+    }
+    
+    // Init everything
+    function initDoneroDemo() {
+      initTailwind();
+      
+      // Preload one item for better demo experience
+      setTimeout(() => {
+        const cartContainer = document.getElementById('cart-items');
+        if (cartContainer && cart.length === 0) {
+          // Auto add a popular item on load for "experience"
+          cart.push({ name: 'Klassik Döner (Demo)', price: 6.90 });
+          updateCart();
+        }
+      }, 800);
+      
+      // Make wheel clickable for fun
+      const wheel = document.getElementById('wheel');
+      if (wheel) {
+        wheel.addEventListener('click', () => {
+          if (!wheel.style.transition || wheel.style.transition.includes('0.3s')) {
+            spinWheel();
+          }
+        });
+      }
+      
+      // Keyboard support for wheel
+      document.addEventListener('keydown', function(e) {
+        if (e.key === '?' && document.activeElement.tagName === 'BODY') {
+          e.preventDefault();
+          const ws = document.getElementById('wheel-section');
+          if (ws) ws.scrollIntoView({behavior:'smooth'});
+          setTimeout(spinWheel, 650);
+        }
+      });
+      
+      // Initial cart state
+      updateCart();
+      
+      // Welcome toast for experience
+      setTimeout(() => {
+        if (document.getElementById('wheel-choice') && document.getElementById('wheel-choice').textContent === 'Dreh das Rad!') {
+          // no auto spin, let user do it
+        }
+      }, 2400);
+      
+      console.log('%c[DÖNERO Preview] Functional demo initialized. Try the wheel!', 'color:#64748b');
+    }
+    
+    window.onload = initDoneroDemo;
+  </script>
+</body>
+</html>

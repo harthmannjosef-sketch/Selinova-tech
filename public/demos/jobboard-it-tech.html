@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechJobs Board – IT & Tech (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <nav class="bg-zinc-900 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+      <div class="font-semibold flex items-center gap-2"><i class="fa-solid fa-briefcase text-emerald-400"></i> TechJobs Board</div>
+      <div class="flex gap-4 text-sm">
+        <button onclick="showJobs()">Jobs</button>
+        <button onclick="showCandidates()">Kandidaten</button>
+        <button onclick="showAdmin()" class="px-4 py-1 bg-emerald-500 text-black rounded-xl text-xs font-medium">Admin / Post Job</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <div id="content"></div>
+  </div>
+
+  <script>
+    let jobs = JSON.parse(localStorage.getItem('jb_jobs') || '[]');
+    let apps = JSON.parse(localStorage.getItem('jb_apps') || '[]');
+    let candidates = JSON.parse(localStorage.getItem('jb_cands') || '[]');
+
+    const defaults = [
+      {id:1, title:'Senior React Engineer (Remote)', company:'Finly GmbH', loc:'Remote / Berlin', salary:'€85–105k', type:'Vollzeit', tags:['React','TS','Fintech'], posted:'2d'},
+      {id:2, title:'DevOps Engineer (Kubernetes)', company:'ScaleCloud', loc:'München', salary:'€78–92k', type:'Vollzeit', tags:['K8s','AWS','Terraform'], posted:'4d'},
+      {id:3, title:'Product Designer – B2B SaaS', company:'Vivid', loc:'Remote', salary:'€68–82k', type:'Vollzeit', tags:['Figma','Design Systems'], posted:'1w'},
+    ];
+
+    function save() {
+      localStorage.setItem('jb_jobs', JSON.stringify(jobs));
+      localStorage.setItem('jb_apps', JSON.stringify(apps));
+      localStorage.setItem('jb_cands', JSON.stringify(candidates));
+    }
+
+    function initData() {
+      if (jobs.length === 0) { jobs = [...defaults]; save(); }
+      if (candidates.length === 0) { candidates = [{id:11, name:'Lukas M.', role:'Frontend', exp:'6y', skills:'React, TS, Next', loc:'Berlin'}]; save(); }
+    }
+
+    function showJobs() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="flex justify-between mb-4">
+          <div><span class="text-2xl font-semibold">280 offene Stellen</span> <span class="text-xs text-emerald-400">IT &amp; Tech • DACH</span></div>
+          <input id="job-search" oninput="filterJobs()" placeholder="Suche Titel / Company / Skill..." class="bg-zinc-900 border border-zinc-700 w-72 px-3 py-2 rounded-2xl text-sm">
+        </div>
+        <div id="jobs-list" class="grid md:grid-cols-2 gap-3"></div>
+      `;
+      renderJobs(jobs);
+    }
+
+    function renderJobs(list) {
+      const el = document.getElementById('jobs-list');
+      if (!el) return;
+      el.innerHTML = list.map(j => `
+        <div onclick="showJobDetail(${j.id})" class="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl cursor-pointer hover:border-emerald-500">
+          <div class="font-semibold">${j.title}</div>
+          <div class="text-sm text-emerald-400">${j.company} • ${j.loc}</div>
+          <div class="mt-3 flex gap-2 text-xs">
+            <span class="bg-zinc-800 px-2 py-px rounded">${j.salary}</span>
+            <span class="bg-zinc-800 px-2 py-px rounded">${j.type}</span>
+          </div>
+          <div class="mt-2 text-xs text-zinc-400">${j.tags.join(' • ')}</div>
+          <div class="text-[10px] mt-2 text-zinc-500">${j.posted} ago</div>
+        </div>
+      `).join('');
+    }
+
+    window.filterJobs = function() {
+      const q = document.getElementById('job-search').value.toLowerCase();
+      const filtered = jobs.filter(j => j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.tags.join(' ').toLowerCase().includes(q));
+      renderJobs(filtered);
+    };
+
+    function showJobDetail(id) {
+      const j = jobs.find(x=>x.id===id);
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <button onclick="showJobs()" class="text-emerald-400 mb-2">← Alle Jobs</button>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <div class="text-2xl font-semibold">${j.title}</div>
+          <div>${j.company} • ${j.loc} • ${j.salary}</div>
+          <div class="mt-6">Beschreibung (Demo): Starke Tech-Company sucht erfahrene/n ${j.tags[0]} Engineer.</div>
+          <button onclick="applyToJob(${id})" class="mt-6 px-8 py-3 bg-emerald-500 text-black font-semibold rounded-2xl">Jetzt bewerben</button>
+        </div>
+      `;
+    }
+
+    function applyToJob(jobId) {
+      const name = prompt('Dein Name:', 'Max Mustermann');
+      if (!name) return;
+      apps.push({id:Date.now(), jobId, name, email:'max@demo.de', status:'new', date:new Date().toISOString().slice(0,10)});
+      save();
+      alert('Bewerbung eingegangen! Der Arbeitgeber sieht sie im Admin.');
+      showCandidates();
+    }
+
+    function showCandidates() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="font-semibold mb-3">Kandidaten-Pool (1.900 registriert)</div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-4">
+          ${candidates.map(ca => `<div class="py-2 border-b border-zinc-800 last:border-none flex justify-between"><div>${ca.name} – ${ca.role} (${ca.exp})</div><div class="text-xs text-emerald-400">${ca.skills}</div></div>`).join('')}
+          <div class="text-[10px] mt-2">Bewerbungen: ${apps.length} (siehe Admin für Matching)</div>
+        </div>
+      `;
+    }
+
+    function showAdmin() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="text-emerald-400 text-xs">EMPLOYER / PLATFORM ADMIN</div>
+        <div class="text-2xl font-semibold mb-4">Job &amp; Bewerbungsverwaltung</div>
+
+        <div class="grid lg:grid-cols-2 gap-5">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="flex justify-between mb-3"><span class="font-medium">Jobs verwalten</span><button onclick="postNewJob()" class="text-xs px-3 py-1 bg-emerald-500 text-black rounded">+ Job ausschreiben</button></div>
+            ${jobs.map(j => `
+              <div class="flex justify-between text-sm py-1 border-t border-zinc-800">
+                <div>${j.title} @ ${j.company}</div>
+                <button onclick="deleteJob(${j.id})" class="text-red-400 text-xs">löschen</button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Eingegangene Bewerbungen (${apps.length})</div>
+            ${apps.length ? apps.map((a,i) => {
+              const job = jobs.find(x=>x.id===a.jobId) || {title:'Unbekannt'};
+              return `<div class="text-sm flex justify-between py-1 border-t border-zinc-800">${a.name} → ${job.title} <button onclick="markHired(${i})" class="text-xs text-emerald-400">hire</button></div>`;
+            }).join('') : '<div class="text-xs text-zinc-400">Noch keine Bewerbungen.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function postNewJob() {
+      const title = prompt('Job Titel:', 'Senior Backend Engineer');
+      if (!title) return;
+      const company = prompt('Company:', 'Dein Startup');
+      const newJ = {id:Date.now(), title, company, loc:'Remote', salary:'€80-100k', type:'Vollzeit', tags:['Node','TS'], posted:'jetzt'};
+      jobs.unshift(newJ);
+      save();
+      showAdmin();
+    }
+
+    function deleteJob(id) { jobs = jobs.filter(x=>x.id!==id); save(); showAdmin(); }
+    function markHired(i) { apps[i].status = 'hired'; save(); showAdmin(); alert('Kandidat als hired markiert.'); }
+
+    function init() {
+      initData();
+      showJobs();
+      console.log('%c[JobBoard IT/Tech] Functional board: listings, detail, apply flow, candidate pool, full Admin (post/delete + applications). Sovereign.', 'color:#166534');
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>

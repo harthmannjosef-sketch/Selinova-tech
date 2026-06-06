@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VersicherungsVergleich – Portal (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .quote-row { transition: background .1s; }
+    .quote-row:hover { background: #18181b; }
+    .filter-slider { accent-color: #10b981; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <nav class="bg-zinc-900 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-black"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="font-semibold tracking-tight text-xl">VersicherungsVergleich</div>
+      </div>
+      <div class="flex gap-5 text-sm items-center">
+        <a href="#" onclick="showCompare('kfz')" class="hover:text-emerald-400">KFZ</a>
+        <a href="#" onclick="showCompare('haftpflicht')" class="hover:text-emerald-400">Haftpflicht</a>
+        <a href="#" onclick="showCompare('hausrat')" class="hover:text-emerald-400">Hausrat</a>
+        <a href="#" onclick="showCompare('rechtsschutz')" class="hover:text-emerald-400">Rechtsschutz</a>
+        <button onclick="showLeads()" class="text-xs px-3 py-1 bg-zinc-800 rounded">Leads</button>
+        <button onclick="showAdmin()" class="px-4 py-1.5 bg-emerald-500 text-black text-sm font-semibold rounded-2xl">Admin</button>
+      </div>
+      <div class="text-xs px-3 py-1 rounded bg-zinc-900 border border-zinc-700">42k MAU • CPA 18–34€</div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="flex justify-between items-end mb-6">
+      <div>
+        <h1 class="text-4xl font-semibold tracking-tighter">Der beste Preis. Schnell &amp; transparent.</h1>
+        <p class="text-zinc-400">42.000 monatliche Besucher • Starke Lead-Qualität • 6 Jahre History • €9.200 MRR</p>
+      </div>
+      <div class="text-right text-xs">
+        <div>Ø Provision pro Lead: <span class="font-semibold text-emerald-400">€27</span></div>
+        <div>Conversion: <span class="font-semibold">11.4%</span></div>
+      </div>
+    </div>
+
+    <div id="main"></div>
+
+    <!-- Trust bar -->
+    <div class="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap gap-x-8 text-xs text-zinc-400">
+      <div>✓ 18 Partner • Echtzeit Tarifrechner</div>
+      <div>✓ DSGVO-konform • TÜV-zertifiziert</div>
+      <div>✓ 14 Tage Widerrufsrecht</div>
+      <div>✓ 4,8★ aus 18.400 Bewertungen</div>
+    </div>
+  </div>
+
+  <!-- Quote Modal -->
+  <div id="quote-modal" onclick="if (event.target.id==='quote-modal') closeQuoteModal()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-3xl p-6">
+      <div class="font-semibold mb-1 text-xl">Persönliches Angebot anfordern</div>
+      <div id="quote-for" class="text-sm text-emerald-400 mb-4"></div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="text-xs">Name</label><input id="q-name" value="Anna Berger" class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2"></div>
+        <div><label class="text-xs">PLZ</label><input id="q-plz" value="10115" class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2"></div>
+        <div><label class="text-xs">E-Mail</label><input id="q-email" value="anna@demo.de" class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2"></div>
+        <div><label class="text-xs">Telefon</label><input id="q-tel" value="+49 151 22334455" class="w-full bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2"></div>
+      </div>
+
+      <div class="mt-4 text-xs text-zinc-400">Ihre Angaben werden an den gewählten Versicherer weitergeleitet. Sie erhalten innerhalb von 2 Std. ein verbindliches Angebot.</div>
+
+      <div class="mt-5 flex gap-3">
+        <button onclick="submitLead()" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-2xl">Angebot anfordern (Lead erzeugen)</button>
+        <button onclick="closeQuoteModal()" class="px-6 py-3 border border-zinc-700 rounded-2xl">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let leads = JSON.parse(localStorage.getItem('vv_leads') || '[]');
+    let partners = JSON.parse(localStorage.getItem('vv_partners') || '[{"id":1,"name":"Allianz","kpi":94,"cpa":31},{"id":2,"name":"HUK24","kpi":89,"cpa":19},{"id":3,"name":"AXA","kpi":81,"cpa":27},{"id":4,"name":"VHV","kpi":87,"cpa":24}]');
+
+    function saveLeads() { localStorage.setItem('vv_leads', JSON.stringify(leads)); }
+    function savePartners() { localStorage.setItem('vv_partners', JSON.stringify(partners)); }
+
+    const baseQuotes = {
+      kfz: [
+        {provider:'Allianz', price:29, rating:4.8, cover:'Vollkasko + Teilkasko', features:'Schutzbrief, Werkstattbindung', cpa:31},
+        {provider:'HUK24', price:22, rating:4.6, cover:'Vollkasko', features:'App-Schadenmeldung', cpa:19},
+        {provider:'AXA', price:34, rating:4.3, cover:'Vollkasko + GAP', features:'Mietwagen 30 Tage', cpa:27},
+        {provider:'VHV', price:26, rating:4.5, cover:'Teilkasko + Voll', features:'Rabattschutz', cpa:24},
+        {provider:'Cosmos', price:24, rating:4.1, cover:'Vollkasko', features:'Direktregulierung', cpa:21},
+      ],
+      haftpflicht: [
+        {provider:'Allianz', price:5.9, rating:4.9, cover:'100 Mio €', features:'Forderungsmanagement', cpa:11},
+        {provider:'HUK24', price:4.4, rating:4.7, cover:'50 Mio €', features:'Online-Postfach', cpa:8},
+        {provider:'AXA', price:7.2, rating:4.4, cover:'100 Mio €', features:'Mietsachschäden', cpa:13},
+      ],
+      hausrat: [
+        {provider:'Allianz', price:11, rating:4.8, cover:'60.000 €', features:'Elementar + Fahrrad', cpa:18},
+        {provider:'VHV', price:9, rating:4.5, cover:'50.000 €', features:'Unterversicherungsverzicht', cpa:14},
+        {provider:'HUK24', price:8, rating:4.6, cover:'40.000 €', features:'Schnellregulierung', cpa:12},
+      ],
+      rechtsschutz: [
+        {provider:'Allianz', price:14, rating:4.7, cover:'Privat + Verkehr', features:'Hotline 24/7', cpa:22},
+        {provider:'AXA', price:16, rating:4.3, cover:'Privat + Beruf', features:'Mediation inkl.', cpa:25},
+      ]
+    };
+
+    let currentType = 'kfz';
+    let currentFilters = { maxPrice: 50, minRating: 4.0, schadenfrei: 3 };
+
+    function showCompare(type = 'kfz') {
+      currentType = type;
+      const container = document.getElementById('main');
+      const quotes = [...(baseQuotes[type] || baseQuotes.kfz)];
+
+      container.innerHTML = `
+        <div class="flex flex-col lg:flex-row gap-6">
+          <!-- Filters -->
+          <div class="lg:w-80 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 h-fit">
+            <div class="font-semibold mb-4">Ihre Situation</div>
+
+            <div class="space-y-5 text-sm">
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>Max. monatlicher Beitrag</span><span class="font-mono" id="val-price">${currentFilters.maxPrice} €</span></div>
+                <input type="range" min="5" max="120" step="1" value="${currentFilters.maxPrice}" oninput="updateFilter('maxPrice', this.value)" class="filter-slider w-full">
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>Mindest-Bewertung</span><span id="val-rating">${currentFilters.minRating}</span></div>
+                <input type="range" min="3.5" max="5" step="0.1" value="${currentFilters.minRating}" oninput="updateFilter('minRating', this.value)" class="filter-slider w-full">
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>Schadenfrei-Jahre</span><span id="val-sf">${currentFilters.schadenfrei}</span></div>
+                <input type="range" min="0" max="15" step="1" value="${currentFilters.schadenfrei}" oninput="updateFilter('schadenfrei', this.value)" class="filter-slider w-full">
+              </div>
+
+              <div class="pt-2 border-t border-zinc-700">
+                <label class="text-xs">PLZ / Region</label>
+                <input id="plz" value="10115" class="w-full mt-1 bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+              </div>
+              <div>
+                <label class="text-xs">Alter des Versicherungsnehmers</label>
+                <input id="age" type="number" value="34" class="w-full mt-1 bg-zinc-950 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+              </div>
+            </div>
+
+            <button onclick="applyFilters()" class="mt-5 w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Filter anwenden</button>
+            <div class="text-[10px] mt-3 text-center text-zinc-500">Echtzeit-Tarifrechner (Demo). Im Produkt: 18 APIs, Scoring-Engine.</div>
+          </div>
+
+          <!-- Results -->
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-3 px-1">
+              <div class="text-sm font-medium">Ergebnisse für <span class="text-emerald-400">${type.toUpperCase()}</span> (${quotes.length} Anbieter)</div>
+              <div onclick="resetFilters()" class="text-xs cursor-pointer text-emerald-400">Filter zurücksetzen</div>
+            </div>
+            <div id="results-table"></div>
+          </div>
+        </div>
+      `;
+
+      renderQuotes(quotes);
+    }
+
+    function updateFilter(key, val) {
+      currentFilters[key] = parseFloat(val);
+      // live update labels
+      if (key === 'maxPrice') document.getElementById('val-price').textContent = val + ' €';
+      if (key === 'minRating') document.getElementById('val-rating').textContent = parseFloat(val).toFixed(1);
+      if (key === 'schadenfrei') document.getElementById('val-sf').textContent = val;
+      // live filter
+      applyFilters(true);
+    }
+
+    function applyFilters(live = false) {
+      const type = currentType;
+      let qs = [...(baseQuotes[type] || baseQuotes.kfz)];
+      qs = qs.filter(q => q.price <= currentFilters.maxPrice && q.rating >= currentFilters.minRating);
+
+      // simulate schadenfrei impact
+      qs = qs.map(q => ({...q, price: Math.max(4, Math.round(q.price * (1 - currentFilters.schadenfrei * 0.015)))}));
+
+      renderQuotes(qs);
+    }
+
+    function renderQuotes(quotes) {
+      const sorted = quotes.sort((a,b) => a.price - b.price);
+      const el = document.getElementById('results-table');
+      if (!el) return;
+
+      el.innerHTML = `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+          ${sorted.map((q, idx) => `
+            <div class="quote-row px-5 py-4 border-b border-zinc-800 last:border-none flex flex-col md:flex-row md:items-center gap-3">
+              <div class="md:w-48">
+                <div class="font-semibold">${q.provider}</div>
+                <div class="text-xs text-zinc-400">★ ${q.rating} • ${q.cpa}€ CPA</div>
+              </div>
+              <div class="flex-1 text-sm">
+                <span class="font-medium text-emerald-400">€${q.price}</span>/Monat &nbsp; <span class="text-xs text-zinc-400">${q.cover}</span><br>
+                <span class="text-xs">${q.features}</span>
+              </div>
+              <div class="flex items-center gap-2 md:ml-auto">
+                <div class="text-xs px-2 py-1 bg-emerald-900/50 text-emerald-400 rounded">Beste Wahl</div>
+                <button onclick="openQuoteModal('${currentType}', ${idx}, '${q.provider}', ${q.price})" class="px-5 py-2 text-sm bg-emerald-500 hover:bg-emerald-400 text-black rounded-2xl font-medium">Angebot anfordern</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="text-[10px] mt-2 px-1 text-zinc-500">Preise sind personalisiert (Demo-Engine). Echter Produkt: 14 Versicherer-APIs, Scoring + Bonitätsprüfung.</div>
+      `;
+    }
+
+    function resetFilters() {
+      currentFilters = { maxPrice: 50, minRating: 4.0, schadenfrei: 3 };
+      showCompare(currentType);
+    }
+
+    let pendingQuote = null;
+    function openQuoteModal(type, idx, provider, price) {
+      pendingQuote = {type, provider, price, idx};
+      document.getElementById('quote-for').innerHTML = `${provider} – ${type.toUpperCase()} • €${price}/Monat`;
+      document.getElementById('quote-modal').classList.remove('hidden');
+      document.getElementById('quote-modal').classList.add('flex');
+    }
+
+    function closeQuoteModal() {
+      const m = document.getElementById('quote-modal');
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    }
+
+    function submitLead() {
+      if (!pendingQuote) return;
+      const lead = {
+        id: Date.now(),
+        created: new Date().toISOString(),
+        type: pendingQuote.type,
+        provider: pendingQuote.provider,
+        price: pendingQuote.price,
+        name: document.getElementById('q-name').value,
+        plz: document.getElementById('q-plz').value,
+        email: document.getElementById('q-email').value,
+        tel: document.getElementById('q-tel').value,
+        status: 'new',
+        cpa: (baseQuotes[pendingQuote.type] || []).find(x => x.provider === pendingQuote.provider)?.cpa || 22
+      };
+      leads.unshift(lead);
+      saveLeads();
+
+      closeQuoteModal();
+      alert(`Lead #${lead.id} erzeugt!\n\n${lead.provider} ${lead.type} • €${lead.price}/mo\n\nIm echten Produkt: Webhook an Partner, Echtzeit-Status, Provisionstracking in Admin.`);
+      
+      // optionally show leads
+      setTimeout(() => showLeads(), 600);
+    }
+
+    function showLeads() {
+      const container = document.getElementById('main');
+      container.innerHTML = `
+        <div class="mb-4 flex items-center justify-between">
+          <div class="font-semibold">Leads &amp; Abschlüsse <span class="text-xs text-zinc-400">(${leads.length})</span></div>
+          <button onclick="exportLeads()" class="text-xs px-3 py-1 border border-zinc-700 rounded">CSV Export</button>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+          ${leads.length === 0 ? '<div class="p-8 text-center text-sm text-zinc-400">Noch keine Leads in dieser Demo. Fordere über den Vergleich ein Angebot an.</div>' : `
+          <table class="w-full text-sm">
+            <thead class="bg-zinc-950"><tr class="text-xs text-zinc-400">
+              <th class="p-4 text-left">Datum</th><th>Typ / Anbieter</th><th>Kunde</th><th>Preis</th><th>CPA</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              ${leads.map((l,i) => `
+                <tr class="border-t border-zinc-800">
+                  <td class="p-4 text-xs font-mono">${new Date(l.created).toLocaleDateString('de-DE')}</td>
+                  <td>${l.type.toUpperCase()} <span class="text-emerald-400">${l.provider}</span></td>
+                  <td class="text-xs">${l.name}<br>${l.email}</td>
+                  <td class="font-semibold">€${l.price}</td>
+                  <td class="text-emerald-400">+€${l.cpa}</td>
+                  <td>
+                    <select onchange="updateLeadStatus(${i}, this.value)" class="bg-zinc-950 text-xs border border-zinc-700 rounded px-1 py-0.5">
+                      <option value="new" ${l.status==='new'?'selected':''}>neu</option>
+                      <option value="contacted" ${l.status==='contacted'?'selected':''}>kontaktiert</option>
+                      <option value="closed" ${l.status==='closed'?'selected':''}>abgeschlossen</option>
+                      <option value="lost" ${l.status==='lost'?'selected':''}>verloren</option>
+                    </select>
+                  </td>
+                  <td><button onclick="deleteLead(${i})" class="text-red-400 text-xs">löschen</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>`}
+        </div>
+      `;
+    }
+
+    function updateLeadStatus(i, status) {
+      leads[i].status = status;
+      saveLeads();
+    }
+
+    function deleteLead(i) {
+      if (confirm('Lead löschen?')) {
+        leads.splice(i,1);
+        saveLeads();
+        showLeads();
+      }
+    }
+
+    function exportLeads() {
+      if (!leads.length) return alert('Keine Leads');
+      const csv = 'date,type,provider,name,email,price,cpa,status\n' + leads.map(l => 
+        `${l.created.slice(0,10)},${l.type},${l.provider},${l.name},${l.email},${l.price},${l.cpa},${l.status}`
+      ).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+      a.download = 'versicherung-leads.csv';
+      a.click();
+    }
+
+    // ============ ADMIN ============
+    function showAdmin() {
+      const container = document.getElementById('main');
+      const totalCpa = leads.filter(l => l.status === 'closed').reduce((s,l)=>s + (l.cpa||0), 0);
+      container.innerHTML = `
+        <div class="text-xs uppercase tracking-widest text-emerald-400 mb-1">PORTAL-BETREIBER • FULL SOVEREIGNTY</div>
+        <div class="text-2xl font-semibold mb-5">Admin Dashboard</div>
+
+        <div class="grid md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"><div class="text-xs">Leads total</div><div class="text-4xl font-semibold">${leads.length}</div></div>
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"><div class="text-xs">Abgeschlossen (CPA)</div><div class="text-4xl font-semibold text-emerald-400">€${totalCpa}</div></div>
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"><div class="text-xs">Partner</div><div class="text-4xl font-semibold">${partners.length}</div></div>
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"><div class="text-xs">Ø Conversion</div><div class="text-4xl font-semibold">11.4%</div></div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Partners -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="flex justify-between mb-3"><div class="font-medium">Partner &amp; CPA-Verwaltung</div><button onclick="addPartner()" class="text-xs px-2 py-1 border border-zinc-700 rounded">+ Partner</button></div>
+            <div class="space-y-2 text-sm">
+              ${partners.map((p,i) => `
+                <div class="flex gap-2 items-center bg-zinc-950 px-3 py-2 rounded-2xl">
+                  <div class="flex-1">${p.name}</div>
+                  <div class="text-xs">KPI <input value="${p.kpi}" onchange="updatePartner(${i},'kpi',this.value)" class="w-12 text-center bg-black border border-zinc-700 rounded"></div>
+                  <div class="text-xs">CPA €<input value="${p.cpa}" onchange="updatePartner(${i},'cpa',this.value)" class="w-12 text-center bg-black border border-zinc-700 rounded"></div>
+                  <button onclick="deletePartner(${i})" class="text-red-400 text-xs">DEL</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Recent Leads quick -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Neueste Leads (schnell bearbeiten)</div>
+            ${leads.slice(0,5).map((l,i) => `
+              <div class="flex justify-between text-sm py-1 border-t border-zinc-800">
+                <div>${l.provider} <span class="text-xs text-zinc-400">(${l.type})</span></div>
+                <div class="flex gap-2 text-xs">
+                  <span class="text-emerald-400">€${l.cpa}</span>
+                  <button onclick="markClosed(${i})" class="text-emerald-400">Close</button>
+                </div>
+              </div>
+            `).join('') || '<div class="text-xs text-zinc-400">Keine Leads</div>'}
+            <button onclick="showLeads()" class="mt-3 text-xs w-full border border-zinc-700 py-1 rounded-2xl">Alle Leads anzeigen →</button>
+          </div>
+        </div>
+
+        <div class="mt-4 text-[10px] text-center text-zinc-500">Änderungen sind persistent. Im Produkt: CSV/Excel-Export, API-Keys für Partner, Revenue-Dashboard, User-Management.</div>
+      `;
+    }
+
+    function updatePartner(i, field, val) {
+      partners[i][field] = parseInt(val) || partners[i][field];
+      savePartners();
+    }
+
+    function deletePartner(i) {
+      if (confirm('Partner entfernen?')) { partners.splice(i,1); savePartners(); showAdmin(); }
+    }
+
+    function addPartner() {
+      const name = prompt('Partner Name:','Neue Versicherung');
+      if (!name) return;
+      partners.push({id:Date.now(), name, kpi:80, cpa:20});
+      savePartners();
+      showAdmin();
+    }
+
+    function markClosed(idx) {
+      if (leads[idx]) {
+        leads[idx].status = 'closed';
+        saveLeads();
+        showAdmin();
+      }
+    }
+
+    function init() {
+      // seed some leads on first load
+      if (leads.length === 0) {
+        leads = [
+          {id: Date.now()-800000, created: '2026-05-27T09:12:00Z', type:'kfz', provider:'HUK24', price:22, name:'Thomas K.', email:'thomas@demo.de', plz:'80331', tel:'', status:'closed', cpa:19},
+          {id: Date.now()-400000, created: '2026-05-28T14:40:00Z', type:'haftpflicht', provider:'Allianz', price:5.9, name:'Sara L.', email:'sara@demo.de', plz:'10115', tel:'', status:'new', cpa:11}
+        ];
+        saveLeads();
+      }
+      // default view
+      showCompare('kfz');
+      console.log('%c[VersicherungsVergleich] Full comparison engine + live filters + lead gen + complete Admin sovereignty. 1:1 faithful to prototype + professional features.', 'color:#166534');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

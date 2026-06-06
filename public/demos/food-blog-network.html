@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodBlog Network – Rezepte &amp; Food (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <nav class="bg-zinc-900 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="font-semibold">FoodBlog Network <span class="text-xs text-emerald-400">3 Domains • 65k MAU</span></div>
+      <div class="flex gap-4 text-sm">
+        <button onclick="showRecipes()" class="hover:text-emerald-400">Rezepte</button>
+        <button onclick="showBlogs()" class="hover:text-emerald-400">Blogs</button>
+        <button onclick="showAdmin()" class="px-4 py-1.5 bg-emerald-500 text-black rounded-2xl text-sm font-medium">Content Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <div id="content"></div>
+  </div>
+
+  <script>
+    let recipes = JSON.parse(localStorage.getItem('fb_recipes') || 'null') || [
+      {id:1, title:'Perfekter Döner', time:'25 Min', servings:4, img:'🌯', cat:'Fastfood', affiliate:12.4, views:12400},
+      {id:2, title:'Vegane Buddha Bowl', time:'15 Min', servings:2, img:'🥗', cat:'Vegan', affiliate:8.9, views:9800},
+      {id:3, title:'Klassischer Apfelstrudel', time:'60 Min', servings:6, img:'🥧', cat:'Dessert', affiliate:15.2, views:6700},
+      {id:4, title:'Schnelles Thai Curry', time:'20 Min', servings:3, img:'🍛', cat:'Asiatisch', affiliate:9.7, views:11200},
+    ];
+    let posts = JSON.parse(localStorage.getItem('fb_posts') || 'null') || [
+      {id:101, title:'Die 10 besten Food-Trends 2026', blog:'EatBerlin', views:18200},
+      {id:102, title:'Streetfood in München', blog:'MünchenEats', views:9400},
+    ];
+    let earnings = JSON.parse(localStorage.getItem('fb_earnings') || '980');
+
+    function save() {
+      localStorage.setItem('fb_recipes', JSON.stringify(recipes));
+      localStorage.setItem('fb_posts', JSON.stringify(posts));
+      localStorage.setItem('fb_earnings', earnings);
+    }
+
+    function showRecipes() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="mb-4 flex justify-between items-end">
+          <div><span class="text-2xl font-semibold">Rezept-Datenbank</span> <span class="text-xs text-emerald-400">(65k Traffic / Mo)</span></div>
+          <button onclick="addRecipe()" class="text-xs px-3 py-1 bg-emerald-500 text-black rounded">+ Rezept</button>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${recipes.map(r => `
+            <div onclick="showRecipeDetail(${r.id})" class="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl cursor-pointer">
+              <div class="text-5xl mb-3">${r.img}</div>
+              <div class="font-semibold">${r.title}</div>
+              <div class="text-xs text-emerald-400">${r.time} • ${r.servings} Portionen • ${r.cat}</div>
+              <div class="mt-3 text-xs">Affiliate-Einnahmen: €${r.affiliate} • ${r.views.toLocaleString('de-DE')} Views</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function showRecipeDetail(id) {
+      const r = recipes.find(x=>x.id===id);
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <button onclick="showRecipes()" class="text-emerald-400 mb-2">← Zurück</button>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+          <div class="text-6xl mb-4">${r.img}</div>
+          <h1 class="text-3xl font-semibold">${r.title}</h1>
+          <div class="text-emerald-400">${r.time} • ${r.servings} Portionen</div>
+
+          <div class="mt-6 grid md:grid-cols-2 gap-6 text-sm">
+            <div>
+              <div class="font-medium mb-2">Zutaten</div>
+              <ul class="list-disc pl-5 text-zinc-300"><li>Frisches Fleisch / Gemüse</li><li>Gewürze &amp; Soßen</li><li>Beilagen nach Wahl</li></ul>
+            </div>
+            <div>
+              <div class="font-medium mb-2">Zubereitung</div>
+              <ol class="list-decimal pl-5 text-zinc-300"><li>Schritt 1...</li><li>Schritt 2...</li><li>Fertig!</li></ol>
+              <button onclick="simulateAffiliate(${id})" class="mt-4 px-5 py-2 bg-emerald-500 text-black rounded-2xl text-sm">Zum Shop / Affiliate Link (Demo)</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function simulateAffiliate(id) {
+      const r = recipes.find(x=>x.id===id);
+      earnings = parseFloat((parseFloat(earnings) + r.affiliate).toFixed(1));
+      save();
+      alert(`Affiliate-Klick getrackt! +€${r.affiliate} (Mediavine / Amazon / Partner).\nNeuer Monatsumsatz: €${earnings}`);
+    }
+
+    function showBlogs() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="mb-4"><span class="text-2xl font-semibold">Blog-Netzwerk (3 Domains)</span></div>
+        <div class="grid md:grid-cols-3 gap-4">
+          ${posts.map(p => `
+            <div class="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl">
+              <div class="font-semibold">${p.title}</div>
+              <div class="text-xs text-emerald-400">${p.blog} • ${p.views.toLocaleString('de-DE')} Views</div>
+              <div class="mt-3 text-xs">Pinterest + Mediavine aktiv • Lesen (Demo)</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function addRecipe() {
+      const title = prompt('Rezept Titel:', 'Neues Lieblingsgericht');
+      if (!title) return;
+      recipes.push({id:Date.now(), title, time:'30 Min', servings:4, img:'🍽️', cat:'Neu', affiliate:7.5, views:120});
+      save();
+      showRecipes();
+    }
+
+    // FULL ADMIN
+    function showAdmin() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="text-emerald-400 text-xs">CONTENT OWNER • SOVEREIGNTY</div>
+        <div class="text-2xl font-semibold mb-5">FoodBlog Network Admin</div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Rezepte verwalten</div>
+            ${recipes.map((r,i) => `
+              <div class="flex justify-between text-sm py-1 border-t border-zinc-800">
+                <div>${r.title}</div>
+                <div class="flex gap-2 text-xs">
+                  <button onclick="editRecipe(${r.id})" class="text-emerald-400">Edit</button>
+                  <button onclick="deleteRecipe(${r.id})" class="text-red-400">Del</button>
+                </div>
+              </div>
+            `).join('')}
+            <button onclick="addRecipe()" class="mt-2 text-xs border border-zinc-700 px-3 py-1 rounded">+ Neues Rezept</button>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Umsatz &amp; Traffic</div>
+            <div class="text-4xl font-semibold">€${earnings}</div>
+            <div class="text-xs text-emerald-400">Monat (Affiliate + Ads)</div>
+            <div class="mt-4 text-sm">Gesamt Views: ${(recipes.reduce((s,r)=>s+r.views,0) + posts.reduce((s,p)=>s+p.views,0)).toLocaleString('de-DE')}</div>
+            <button onclick="exportRevenue()" class="mt-3 text-xs w-full border border-zinc-700 py-1.5 rounded-2xl">Revenue Report exportieren</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function editRecipe(id) {
+      const r = recipes.find(x=>x.id===id);
+      r.title = prompt('Titel:', r.title) || r.title;
+      save();
+      showAdmin();
+    }
+
+    function deleteRecipe(id) {
+      if (confirm('Rezept löschen?')) {
+        recipes = recipes.filter(x=>x.id!==id);
+        save();
+        showAdmin();
+      }
+    }
+
+    function exportRevenue() {
+      alert('CSV mit Affiliate- & Werbeeinnahmen exportiert (Demo).');
+    }
+
+    function init() {
+      showRecipes();
+      console.log('%c[FoodBlog Network] Full sovereign demo: recipes with affiliate simulation, multi-blog, complete Content Admin + revenue tracking. Ready2use.', 'color:#166534');
+    }
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHER • Artist Music Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+    
+    :root {
+      --bg: #0a0a0f;
+      --card: #111114;
+      --accent: #6366f1;
+    }
+    
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+    
+    .font-display {
+      font-family: 'Space Grotesk', 'Inter', system_ui, sans-serif;
+      font-weight: 600;
+    }
+
+    .music-gradient {
+      background: linear-gradient(135deg, #1a1a24 0%, #0a0a0f 100%);
+    }
+
+    .glass {
+      background: rgba(17, 17, 20, 0.85);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-active {
+      background: #1f2937;
+      color: white;
+      border-radius: 8px;
+    }
+
+    .track-row {
+      transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .track-row:hover {
+      background-color: #1f2937;
+    }
+
+    .studio-card {
+      transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s;
+    }
+    
+    .studio-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    .player-bar {
+      background: #111114;
+      border-top: 1px solid #27272a;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: #27272a;
+      position: relative;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: #6366f1;
+      transition: width 0.1s linear;
+    }
+
+    .section {
+      display: none;
+    }
+    
+    .section.active {
+      display: block;
+    }
+
+    .track-cover {
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+    }
+
+    .modern-btn {
+      transition: all 0.1s ease;
+    }
+    
+    .modern-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .music-grid {
+      scrollbar-width: thin;
+    }
+
+    .stat-number {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .aether-logo {
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .wave {
+      animation: soundwave 1.2s infinite ease-in-out;
+    }
+    
+    .wave:nth-child(2) { animation-delay: 0.2s; }
+    .wave:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes soundwave {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+
+    .mini-player {
+      box-shadow: 0 -4px 20px -2px rgb(0 0 0 / 0.4);
+    }
+
+    .nav-item {
+      transition: all .1s ease;
+    }
+    
+    .nav-item:hover {
+      color: #a5b4fc;
+    }
+
+    .highclass-shadow {
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    }
+
+    /* Mobile bottom nav */
+    .mobile-bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 80px; /* above player bar */
+      left: 0;
+      right: 0;
+      background: #111114;
+      border-top: 1px solid #27272a;
+      z-index: 50;
+      padding: 4px 0;
+    }
+    .mobile-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #a1a1aa;
+      padding: 2px 0;
+      transition: color 0.1s;
+      min-height: 48px; /* touch friendly */
+    }
+    .mobile-nav-item.active {
+      color: #6366f1;
+    }
+    .mobile-nav-item i {
+      font-size: 20px;
+      margin-bottom: 1px;
+    }
+    @media (min-width: 1024px) {
+      .mobile-bottom-nav {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#0a0a0f] text-zinc-200">
+  <div class="max-w-[1480px] mx-auto">
+    <!-- Top Navigation -->
+    <div class="h-16 border-b border-zinc-800 px-4 md:px-8 flex items-center justify-between bg-[#0a0a0f] sticky top-0 z-50">
+      <div class="flex items-center gap-x-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-x-3">
+          <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-inner">
+            <i class="fa-solid fa-infinity text-white text-2xl"></i>
+          </div>
+          <div>
+            <span class="aether-logo text-3xl font-semibold tracking-tighter">AETHER</span>
+            <span class="text-[10px] text-zinc-500 font-mono tracking-[1px] block -mt-1">STUDIO</span>
+          </div>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-x-1.5 text-sm ml-8">
+          <div class="px-3 py-1.5 bg-zinc-900 rounded-full text-xs font-medium flex items-center gap-x-1.5 border border-zinc-800">
+            <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span class="text-emerald-400 font-semibold">LIVE</span>
+            <span class="text-zinc-400">• 142k listeners</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artist Profile -->
+      <div class="flex items-center gap-x-3">
+        <div onclick="showProfileModal()" class="flex items-center gap-x-3 cursor-pointer hover:bg-zinc-900 px-3 py-1.5 rounded-3xl transition-colors">
+          <div class="text-right hidden md:block">
+            <div class="text-sm font-semibold" id="top-artist-name">Alex Rivera</div>
+            <div class="text-[10px] text-zinc-500 -mt-0.5">Artist • Verified</div>
+          </div>
+          <div class="w-9 h-9 rounded-2xl overflow-hidden ring-2 ring-zinc-800">
+            <img id="top-artist-avatar" src="https://picsum.photos/id/1011/36/36" class="w-full h-full object-cover" alt="Artist">
+          </div>
+        </div>
+        
+        <button onclick="exportData()" 
+                class="hidden md:flex items-center gap-x-2 text-xs px-4 h-9 rounded-3xl border border-zinc-700 hover:bg-zinc-900 transition-colors font-medium">
+          <i class="fa-solid fa-download text-xs"></i>
+          <span>Export</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="flex">
+      <!-- Sidebar -->
+      <div class="w-64 border-r border-zinc-800 h-[calc(100vh-4rem)] p-4 flex-shrink-0 bg-[#0a0a0f] hidden lg:flex flex-col">
+        <div class="space-y-1 mb-6">
+          <div onclick="showSection('home')" class="nav-item flex items-center gap-x-3 px-4 py-3 rounded-3xl cursor-pointer text-sm font-medium hover:bg-zinc-900 nav-active" id="nav-home">
+            <i class="fa-solid fa-home w-5"></i>
+            <span>Home</span>
+          </div>
+          <div onclick="showSection('library')" class="nav-item flex items-center gap-x-3 px-4 py-3 rounded-3xl cursor-pointer text-sm font-medium hover:bg-zinc-900" id="nav-library">
+            <i class="fa-solid fa-music w-5"></i>
+            <span>Library</span>
+          </div>
+          <div onclick="showSection('playlists')" class="nav-item flex items-center gap-x-3 px-4 py-3 rounded-3xl cursor-pointer text-sm font-medium hover:bg-zinc-900" id="nav-playlists">
+            <i class="fa-solid fa-list w-5"></i>
+            <span>Playlists</span>
+          </div>
+          <div onclick="showSection('studio')" class="nav-item flex items-center gap-x-3 px-4 py-3 rounded-3xl cursor-pointer text-sm font-medium hover:bg-zinc-900" id="nav-studio">
+            <i class="fa-solid fa-microphone w-5"></i>
+            <span>Studio</span>
+          </div>
+          <div onclick="showSection('analytics')" class="nav-item flex items-center gap-x-3 px-4 py-3 rounded-3xl cursor-pointer text-sm font-medium hover:bg-zinc-900" id="nav-analytics">
+            <i class="fa-solid fa-chart-line w-5"></i>
+            <span>Analytics</span>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-4 border-t border-zinc-800">
+          <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-zinc-500 font-medium">Your Artist</div>
+          <div class="px-4 py-2.5 bg-zinc-900 rounded-3xl text-sm">
+            <div class="font-semibold" id="sidebar-artist-name">Alex Rivera</div>
+            <div class="text-emerald-400 text-xs mt-0.5">2.4m total streams</div>
+          </div>
+          
+          <button onclick="resetAllData()" 
+                  class="mt-4 w-full flex items-center justify-center gap-x-2 text-xs text-zinc-400 hover:text-red-400 transition-colors py-2">
+            <i class="fa-solid fa-undo text-xs"></i>
+            <span class="font-medium">Reset Demo Data</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 min-h-[calc(100vh-4rem)] pb-[140px] lg:pb-24">
+        
+        <!-- HOME SECTION -->
+        <div id="section-home" class="section active p-4 md:p-8">
+          <div class="max-w-[1100px]">
+            <!-- Hero -->
+            <div class="rounded-3xl bg-gradient-to-br from-zinc-900 to-black p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 highclass-shadow">
+              <div class="flex-1">
+                <div class="inline-flex items-center gap-x-2 bg-white/5 text-white px-3 py-1 rounded-full text-xs font-medium mb-4 border border-white/10">
+                  <i class="fa-solid fa-globe"></i>
+                  <span>ARTIST OWNED • 100% SOVEREIGN • MOBILE + DESKTOP</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-7xl font-display tracking-tighter leading-none">Your music.<br> Your rules.</h1>
+                <p class="mt-4 text-xl text-zinc-400 max-w-md">The premium platform built exclusively for independent artists. Upload, own, and monetize directly.</p>
+                
+                <div class="flex items-center gap-x-3 mt-7">
+                  <button onclick="showSection('studio')" 
+                          class="modern-btn px-7 py-3.5 bg-white text-black font-semibold rounded-3xl flex items-center gap-x-2 text-sm hover:bg-zinc-200">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>Upload new track</span>
+                  </button>
+                  <button onclick="showSection('library')" 
+                          class="modern-btn px-5 py-3.5 border border-white/30 hover:bg-white/5 font-medium rounded-3xl text-sm flex items-center gap-x-2">
+                    <span>Browse catalog</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="flex-shrink-0 w-full md:w-auto">
+                <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 w-full md:w-[260px]">
+                  <div class="flex items-center justify-between mb-4">
+                    <div>
+                      <div class="text-xs text-zinc-500">MONTHLY LISTENERS</div>
+                      <div id="hero-listeners" class="text-4xl font-display font-semibold tabular-nums">142,840</div>
+                    </div>
+                    <div class="text-emerald-400 text-right">
+                      <i class="fa-solid fa-arrow-trend-up"></i>
+                      <div class="text-xs">+18%</div>
+                    </div>
+                  </div>
+                  
+                  <div class="text-xs flex items-center justify-between text-zinc-400">
+                    <div>Top city: Berlin</div>
+                    <div class="font-mono text-[10px]">DE • AT • CH</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Stats + Popular -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="glass border border-zinc-800 rounded-3xl p-5">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="text-xs text-zinc-400">TOTAL TRACKS</div>
+                    <div id="home-total-tracks" class="text-4xl font-semibold mt-1">47</div>
+                  </div>
+                  <i class="fa-solid fa-music text-3xl text-zinc-600"></i>
+                </div>
+              </div>
+              <div class="glass border border-zinc-800 rounded-3xl p-5">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="text-xs text-zinc-400">TOTAL PLAYS</div>
+                    <div id="home-total-plays" class="text-4xl font-semibold mt-1">8.4m</div>
+                  </div>
+                  <i class="fa-solid fa-play text-3xl text-zinc-600"></i>
+                </div>
+              </div>
+              <div class="glass border border-zinc-800 rounded-3xl p-5">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="text-xs text-zinc-400">PLAYLISTS CREATED</div>
+                    <div id="home-playlists-count" class="text-4xl font-semibold mt-1">19</div>
+                  </div>
+                  <i class="fa-solid fa-list-ul text-3xl text-zinc-600"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Popular this month -->
+            <div class="mt-8">
+              <div class="flex items-center justify-between mb-4 px-1">
+                <div class="font-semibold text-xl">Popular this month</div>
+                <button onclick="showSection('library')" class="text-xs text-indigo-400 flex items-center gap-x-1 hover:text-indigo-300">
+                  SEE ALL <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+              </div>
+              
+              <div id="home-popular-tracks" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIBRARY SECTION -->
+        <div id="section-library" class="section p-4 md:p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-3xl font-semibold tracking-tight">Your Library</h2>
+              <p class="text-zinc-400 text-sm">All uploaded tracks • <span id="library-count">0</span> tracks</p>
+            </div>
+            
+            <div class="flex gap-2">
+              <div class="relative w-72">
+                <input id="library-search" type="text" placeholder="Search tracks..." 
+                       onkeyup="filterLibrary()"
+                       class="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-700 text-sm px-4 h-10 rounded-3xl pl-10 outline-none">
+                <i class="fa-solid fa-search absolute left-4 top-3 text-zinc-500"></i>
+              </div>
+              <button onclick="showSection('studio')" class="modern-btn bg-white text-black px-5 text-sm font-semibold h-10 rounded-3xl flex items-center gap-x-2">
+                <i class="fa-solid fa-plus"></i> <span class="hidden md:inline">Upload</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="library-tracks" class="space-y-1 max-w-[1080px]">
+            <!-- Populated dynamically by JS -->
+          </div>
+        </div>
+
+        <!-- PLAYLISTS SECTION -->
+        <div id="section-playlists" class="section p-4 md:p-8">
+          <div class="max-w-[1080px]">
+            <div class="flex justify-between mb-6 items-end">
+              <div>
+                <h2 class="text-3xl font-semibold">Playlists</h2>
+                <p class="text-zinc-400">Curated by you</p>
+              </div>
+              <button onclick="createNewPlaylist()" class="modern-btn px-5 h-10 flex items-center gap-x-2 text-sm bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-3xl">
+                <i class="fa-solid fa-plus"></i> <span>New Playlist</span>
+              </button>
+            </div>
+            
+            <div id="playlists-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- STUDIO SECTION -->
+        <div id="section-studio" class="section p-4 md:p-8">
+          <div class="max-w-[1020px]">
+            <div class="mb-8">
+              <h2 class="text-3xl font-semibold">Music Studio</h2>
+              <p class="text-zinc-400">Upload, edit and manage your catalog. 100% sovereign.</p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="glass border border-zinc-700 rounded-3xl p-8 mb-8">
+              <div class="flex items-center gap-x-3 mb-5">
+                <i class="fa-solid fa-cloud-upload-alt text-3xl text-indigo-400"></i>
+                <div>
+                  <div class="font-semibold text-xl">Upload new track</div>
+                  <div class="text-xs text-zinc-400">MP3 • Max recommended 5MB for this demo</div>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Upload form -->
+                <div>
+                  <div class="space-y-5">
+                    <div>
+                      <label class="text-xs font-medium text-zinc-300 block mb-1.5">TRACK TITLE</label>
+                      <input id="upload-title" type="text" value="Midnight Drive" class="bg-zinc-900 border border-zinc-700 w-full px-4 h-10 rounded-2xl text-sm">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                      <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1.5">ALBUM</label>
+                        <input id="upload-album" type="text" value="Nocturne" class="bg-zinc-900 border border-zinc-700 w-full px-4 h-10 rounded-2xl text-sm">
+                      </div>
+                      <div>
+                        <label class="text-xs font-medium text-zinc-300 block mb-1.5">GENRE</label>
+                        <select id="upload-genre" class="bg-zinc-900 border border-zinc-700 w-full px-4 h-10 rounded-2xl text-sm">
+                          <option>Electronic</option>
+                          <option>Ambient</option>
+                          <option>Indie</option>
+                          <option>Pop</option>
+                          <option>Hip-Hop</option>
+                          <option>Alternative</option>
+                          <option>Lo-Fi</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="text-xs font-medium text-zinc-300 block mb-1.5">COVER ART</label>
+                      <input type="file" id="upload-cover" accept="image/*" class="text-sm file:mr-3 file:px-4 file:py-1.5 file:rounded-2xl file:border-0 file:bg-zinc-800 file:text-xs file:font-medium">
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div id="drop-zone"
+                       class="border border-dashed border-zinc-600 hover:border-indigo-400 transition-colors rounded-3xl p-5 text-center h-full flex flex-col justify-center bg-zinc-950/50">
+                    <label class="cursor-pointer block">
+                      <input type="file" id="upload-audio" accept="audio/mp3,audio/mpeg,audio/wav" class="hidden">
+                      <div class="flex flex-col items-center">
+                        <i class="fa-solid fa-file-audio text-4xl text-zinc-400 mb-3"></i>
+                        <div class="font-semibold">Drop MP3 / WAV here or click</div>
+                        <div id="audio-filename" class="text-emerald-400 text-xs mt-1 font-mono"></div>
+                        <div class="text-[10px] text-zinc-500 mt-1">Real audio will play in this preview</div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <button onclick="uploadTrack()" 
+                          class="mt-4 w-full py-3 bg-indigo-600 hover:bg-indigo-500 transition-colors font-semibold rounded-3xl text-sm flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>UPLOAD TO CATALOG</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Current Catalog in Studio -->
+            <div>
+              <div class="flex items-center justify-between mb-4 px-1">
+                <div class="font-semibold">Current Catalog <span id="studio-track-count" class="text-zinc-500 text-sm font-normal">(47)</span></div>
+              </div>
+              
+              <div id="studio-tracks-list" class="space-y-2">
+                <!-- JS populated editable rows -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS SECTION -->
+        <div id="section-analytics" class="section p-4 md:p-8">
+          <div class="max-w-[1080px]">
+            <h2 class="text-3xl font-semibold mb-1">Analytics</h2>
+            <p class="text-zinc-400 mb-6">Real-time insights from your listeners</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div class="glass border border-zinc-700 rounded-3xl p-5">
+                <div class="text-xs text-zinc-400">TOTAL STREAMS</div>
+                <div id="analytics-total-streams" class="text-4xl font-semibold mt-1 tabular-nums">8,412,930</div>
+                <div class="text-emerald-400 text-xs mt-1">+124k this week</div>
+              </div>
+              <div class="glass border border-zinc-700 rounded-3xl p-5">
+                <div class="text-xs text-zinc-400">MONTHLY LISTENERS</div>
+                <div id="analytics-monthly" class="text-4xl font-semibold mt-1 tabular-nums">142,840</div>
+              </div>
+              <div class="glass border border-zinc-700 rounded-3xl p-5">
+                <div class="text-xs text-zinc-400">TOP GENRE</div>
+                <div id="analytics-top-genre" class="text-4xl font-semibold mt-1">Electronic</div>
+              </div>
+              <div class="glass border border-zinc-700 rounded-3xl p-5">
+                <div class="text-xs text-zinc-400">AVG. PLAYTIME</div>
+                <div id="analytics-avg-time" class="text-4xl font-semibold mt-1">3:42</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Top Tracks -->
+              <div class="glass border border-zinc-700 rounded-3xl p-6">
+                <div class="font-semibold mb-4 flex items-center gap-x-2">
+                  <i class="fa-solid fa-trophy"></i> 
+                  <span>Top performing tracks</span>
+                </div>
+                <div id="analytics-top-tracks" class="space-y-4 text-sm">
+                  <!-- JS -->
+                </div>
+              </div>
+
+              <div class="glass border border-zinc-700 rounded-3xl p-6">
+                <div class="font-semibold mb-4">Listener geography</div>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between"><div>Germany</div><div class="font-medium">38%</div></div>
+                  <div class="flex justify-between"><div>Austria</div><div class="font-medium">22%</div></div>
+                  <div class="flex justify-between"><div>Switzerland</div><div class="font-medium">14%</div></div>
+                  <div class="flex justify-between"><div>United Kingdom</div><div class="font-medium">11%</div></div>
+                  <div class="flex justify-between"><div>Other</div><div class="font-medium">15%</div></div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-zinc-700 text-xs text-zinc-400">
+                  Data is stored locally and updates live as people play your tracks.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation (for phones/tablets) -->
+    <div class="mobile-bottom-nav lg:hidden">
+      <div onclick="showSection('home'); updateMobileNav(this)" class="mobile-nav-item active" data-section="home">
+        <i class="fa-solid fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div onclick="showSection('library'); updateMobileNav(this)" class="mobile-nav-item" data-section="library">
+        <i class="fa-solid fa-music"></i>
+        <span>Library</span>
+      </div>
+      <div onclick="showSection('playlists'); updateMobileNav(this)" class="mobile-nav-item" data-section="playlists">
+        <i class="fa-solid fa-list"></i>
+        <span>Playlists</span>
+      </div>
+      <div onclick="showSection('studio'); updateMobileNav(this)" class="mobile-nav-item" data-section="studio">
+        <i class="fa-solid fa-microphone"></i>
+        <span>Studio</span>
+      </div>
+      <div onclick="showSection('analytics'); updateMobileNav(this)" class="mobile-nav-item" data-section="analytics">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Analytics</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Player -->
+  <div id="player-bar" class="player-bar fixed bottom-0 left-0 right-0 z-[60] hidden border-t border-zinc-800">
+    <div class="max-w-[1480px] mx-auto px-6 flex items-center h-20">
+      <div class="flex items-center gap-x-4 flex-1 min-w-0">
+        <!-- Current track info -->
+        <div onclick="showNowPlaying()" class="flex items-center gap-x-3 cursor-pointer min-w-0">
+          <div id="player-cover" class="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800 ring-1 ring-zinc-700">
+            <img src="https://picsum.photos/id/1015/44/44" class="w-full h-full object-cover" id="player-cover-img">
+          </div>
+          <div class="min-w-0">
+            <div id="player-title" class="font-medium text-sm truncate">Midnight Drive</div>
+            <div id="player-artist" class="text-xs text-zinc-400 truncate">Alex Rivera</div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-x-1 ml-6">
+          <button onclick="prevTrack()" class="w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-white">
+            <i class="fa-solid fa-step-backward"></i>
+          </button>
+          <button onclick="togglePlay()" id="player-play-btn"
+                  class="w-9 h-9 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 transition-transform">
+            <i class="fa-solid fa-play ml-0.5" id="player-play-icon"></i>
+          </button>
+          <button onclick="nextTrack()" class="w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-white">
+            <i class="fa-solid fa-step-forward"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="flex-1 max-w-[420px] mx-4">
+        <div class="flex items-center gap-x-2 text-[10px] text-zinc-400 font-mono">
+          <div id="player-current-time">0:00</div>
+          <div class="flex-1 px-1">
+            <input type="range" id="player-progress" min="0" max="100" value="0" step="0.1"
+                   oninput="seekAudio(this.value)"
+                   class="w-full accent-indigo-500">
+          </div>
+          <div id="player-duration">3:42</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-x-3 flex-1 justify-end">
+        <!-- Volume -->
+        <div class="flex items-center gap-x-2 w-28">
+          <i class="fa-solid fa-volume-down text-zinc-400"></i>
+          <input type="range" id="player-volume" min="0" max="100" value="80" 
+                 oninput="setVolume(this.value)"
+                 class="accent-indigo-500 w-full">
+        </div>
+        
+        <button onclick="toggleQueue()" class="px-3 py-1.5 text-xs border border-zinc-700 hover:bg-zinc-900 rounded-2xl flex items-center gap-x-1.5 text-zinc-400">
+          <i class="fa-solid fa-list"></i>
+          <span class="hidden md:inline text-xs">Queue</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-sm px-4 py-2 rounded-3xl shadow-2xl border border-zinc-700 flex items-center gap-x-2 z-[70]">
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- Queue Modal -->
+  <div id="queue-modal" onclick="if (event.target.id === 'queue-modal') toggleQueue()" class="hidden fixed inset-0 bg-black/70 z-[80] flex items-end lg:items-center justify-center">
+    <div onclick="event.stopImmediatePropagation()" class="glass w-full max-w-lg lg:mx-4 lg:rounded-3xl border border-zinc-700 rounded-t-3xl p-5 max-h-[70vh] overflow-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold flex items-center gap-x-2"><i class="fa-solid fa-list"></i> <span>Play Queue</span></div>
+        <button onclick="toggleQueue()" class="text-zinc-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+      <div id="queue-list" class="space-y-1 text-sm"></div>
+      <div class="mt-4 text-[10px] text-zinc-500">Queue is session-only in this preview. Add tracks from Library or Playlists.</div>
+    </div>
+  </div>
+
+  <script>
+    // Tailwind script
+    function initTailwind() {
+      document.documentElement.style.setProperty('--accent', '#6366f1');
+    }
+
+    // ==================== DATA & STORAGE ====================
+    let artist = {
+      name: "Alex Rivera",
+      bio: "Berlin-based electronic artist. Crafting immersive soundscapes since 2019.",
+      avatar: "https://picsum.photos/id/1011/80/80",
+      followers: 142840
+    };
+
+    let tracks = [];
+    let playlists = [];
+    let currentTrack = null;
+    let audioElement = new Audio();
+    let isPlaying = false;
+    let queue = [];
+    let currentQueueIndex = 0;
+
+    function saveToStorage() {
+      localStorage.setItem('aether_artist', JSON.stringify(artist));
+      localStorage.setItem('aether_tracks', JSON.stringify(tracks));
+      localStorage.setItem('aether_playlists', JSON.stringify(playlists));
+    }
+
+    function loadFromStorage() {
+      const savedArtist = localStorage.getItem('aether_artist');
+      if (savedArtist) artist = JSON.parse(savedArtist);
+
+      const savedTracks = localStorage.getItem('aether_tracks');
+      if (savedTracks) tracks = JSON.parse(savedTracks);
+
+      const savedPlaylists = localStorage.getItem('aether_playlists');
+      if (savedPlaylists) playlists = JSON.parse(savedPlaylists);
+    }
+
+    function seedDemoData() {
+      if (tracks.length > 0) return;
+
+      // Premium demo catalog – realistic for a successful independent artist platform preview
+      const demoTracks = [
+        {
+          id: 't1', title: "Midnight Drive", album: "Nocturne", genre: "Electronic",
+          duration: 224, plays: 284300, uploadedAt: "2025-11-12",
+          cover: "https://picsum.photos/id/1015/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't2', title: "Echo Chamber", album: "Nocturne", genre: "Ambient",
+          duration: 318, plays: 176900, uploadedAt: "2025-10-03",
+          cover: "https://picsum.photos/id/160/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't3', title: "Neon Reverie", album: "Luminescence", genre: "Electronic",
+          duration: 187, plays: 412700, uploadedAt: "2025-09-18",
+          cover: "https://picsum.photos/id/201/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't4', title: "Fractured Light", album: "Luminescence", genre: "Indie",
+          duration: 251, plays: 98300, uploadedAt: "2025-08-22",
+          cover: "https://picsum.photos/id/251/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't5', title: "Static Bloom", album: "Singles", genre: "Lo-Fi",
+          duration: 193, plays: 156400, uploadedAt: "2025-07-05",
+          cover: "https://picsum.photos/id/29/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't6', title: "Vapor Drift", album: "Nocturne", genre: "Ambient",
+          duration: 274, plays: 67100, uploadedAt: "2025-12-01",
+          cover: "https://picsum.photos/id/180/300/300", audioData: null, isDemo: true
+        },
+        {
+          id: 't7', title: "Pulse Theory", album: "Singles", genre: "Electronic",
+          duration: 208, plays: 329800, uploadedAt: "2025-06-14",
+          cover: "https://picsum.photos/id/133/300/300", audioData: null, isDemo: true
+        }
+      ];
+
+      tracks = demoTracks;
+
+      tracks.forEach(track => {
+        track.audioData = null;
+      });
+
+      // Curated playlists
+      playlists = [
+        { id: 'p1', name: "Late Night Drives", trackIds: ['t1', 't3', 't7'] },
+        { id: 'p2', name: "Ambient Sessions", trackIds: ['t2', 't6'] },
+        { id: 'p3', name: "Best of 2025", trackIds: ['t3', 't7', 't1', 't4'] }
+      ];
+
+      saveToStorage();
+    }
+
+    // Generate a much richer, music-like preview sound using layered oscillators + noise
+    function createDemoAudio(track) {
+      return new Promise((resolve) => {
+        const duration = Math.max(60, Math.min(track.duration || 210, 320));
+        const sampleRate = 44100;
+        const offlineCtx = new OfflineAudioContext(2, Math.floor(duration * sampleRate), sampleRate);
+
+        const isAmbient = track.genre === 'Ambient' || track.genre === 'Lo-Fi';
+        const isElectronic = track.genre === 'Electronic';
+
+        // Master gain + compressor
+        const masterGain = offlineCtx.createGain();
+        masterGain.gain.value = 0.75;
+        const compressor = offlineCtx.createDynamicsCompressor();
+        compressor.threshold.value = -18;
+        compressor.knee.value = 8;
+        compressor.ratio.value = 6;
+
+        const finalFilter = offlineCtx.createBiquadFilter();
+        finalFilter.type = 'lowpass';
+        finalFilter.frequency.value = isAmbient ? 2400 : 5200;
+
+        // === Bass layer (low sine/saw) ===
+        const bass = offlineCtx.createOscillator();
+        bass.type = isAmbient ? 'sine' : 'sawtooth';
+        bass.frequency.value = isAmbient ? 55 : 65;
+
+        const bassGain = offlineCtx.createGain();
+        bassGain.gain.value = isAmbient ? 0.55 : 0.7;
+
+        const bassFilter = offlineCtx.createBiquadFilter();
+        bassFilter.type = 'lowpass';
+        bassFilter.frequency.value = 320;
+
+        // === Lead / Pad layer ===
+        const lead = offlineCtx.createOscillator();
+        lead.type = isAmbient ? 'sine' : (isElectronic ? 'square' : 'sawtooth');
+        lead.frequency.value = isAmbient ? 220 : 330;
+
+        const leadGain = offlineCtx.createGain();
+        leadGain.gain.value = isAmbient ? 0.28 : 0.38;
+
+        const leadFilter = offlineCtx.createBiquadFilter();
+        leadFilter.type = 'lowpass';
+        leadFilter.frequency.value = isAmbient ? 1100 : 2100;
+
+        // Simple LFO for movement on lead (ambient especially)
+        const lfo = offlineCtx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = isAmbient ? 0.18 : 0.6;
+
+        const lfoGain = offlineCtx.createGain();
+        lfoGain.gain.value = isAmbient ? 18 : 6;
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(lead.frequency);
+
+        // === Noise / percussion layer (for rhythm) ===
+        const noise = offlineCtx.createBufferSource();
+        const noiseBuffer = offlineCtx.createBuffer(1, sampleRate * duration, sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+          noiseData[i] = Math.random() * 2 - 1;
+        }
+        noise.buffer = noiseBuffer;
+
+        const noiseFilter = offlineCtx.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = isAmbient ? 1800 : 4200;
+        noiseFilter.Q.value = isAmbient ? 1.8 : 4.5;
+
+        const noiseGain = offlineCtx.createGain();
+        noiseGain.gain.value = isAmbient ? 0.035 : 0.065;
+
+        // Envelope for noise (soft hi-hat like pulses)
+        const noiseEnv = offlineCtx.createGain();
+        noiseEnv.gain.value = 0.0001;
+
+        // Connect noise chain
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseEnv);
+        noiseEnv.connect(noiseGain);
+
+        // === Connect main synth chain ===
+        bass.connect(bassFilter);
+        bassFilter.connect(bassGain);
+
+        lead.connect(leadFilter);
+        leadFilter.connect(leadGain);
+
+        const synthGain = offlineCtx.createGain();
+        bassGain.connect(synthGain);
+        leadGain.connect(synthGain);
+
+        synthGain.connect(finalFilter);
+        noiseGain.connect(finalFilter);
+
+        finalFilter.connect(compressor);
+        compressor.connect(masterGain);
+        masterGain.connect(offlineCtx.destination);
+
+        // Start sources
+        const startTime = offlineCtx.currentTime;
+        bass.start(startTime);
+        lead.start(startTime);
+        lfo.start(startTime);
+        noise.start(startTime);
+
+        // Simple musical "melody" automation (different per genre)
+        const notes = isAmbient 
+          ? [220, 247, 294, 330, 392] 
+          : (isElectronic ? [330, 392, 440, 523, 587] : [294, 330, 392, 440, 494]);
+
+        let t = 0.6;
+        notes.forEach((note, i) => {
+          const when = startTime + t + (i * (isAmbient ? 3.8 : 2.1));
+          if (when < startTime + duration - 1) {
+            lead.frequency.setValueAtTime(note, when);
+            // gentle volume swell
+            leadGain.gain.setValueAtTime(leadGain.gain.value * 0.6, when);
+            leadGain.gain.linearRampToValueAtTime(isAmbient ? 0.28 : 0.38, when + 0.8);
+          }
+          t += 1.6;
+        });
+
+        // Gentle noise pulses every ~1.8s for groove
+        for (let i = 0; i < Math.floor(duration / 1.85); i++) {
+          const pulseTime = startTime + 0.9 + i * 1.85;
+          if (pulseTime < startTime + duration - 0.3) {
+            noiseEnv.gain.setValueAtTime(0.0001, pulseTime);
+            noiseEnv.gain.linearRampToValueAtTime(1.0, pulseTime + 0.04);
+            noiseEnv.gain.linearRampToValueAtTime(0.0001, pulseTime + 0.45);
+          }
+        }
+
+        // Gentle fade out at the end
+        masterGain.gain.setValueAtTime(0.75, startTime + duration - 2.5);
+        masterGain.gain.linearRampToValueAtTime(0.001, startTime + duration - 0.1);
+
+        offlineCtx.startRendering().then((renderedBuffer) => {
+          const wav = audioBufferToWav(renderedBuffer);
+          const blob = new Blob([wav], { type: 'audio/wav' });
+          const url = URL.createObjectURL(blob);
+          resolve(url);
+        }).catch(() => {
+          // Fallback: very simple tone if rendering fails
+          resolve('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+        });
+      });
+    }
+
+    // Helper: Convert AudioBuffer to WAV (simple implementation)
+    function audioBufferToWav(buffer) {
+      const numOfChan = buffer.numberOfChannels;
+      const length = buffer.length * numOfChan * 2 + 44;
+      const bufferArray = new ArrayBuffer(length);
+      const view = new DataView(bufferArray);
+      const channels = [];
+      let i;
+      let sample;
+      let offset = 0;
+      let pos = 0;
+
+      // WAV header
+      setUint32(view, pos, 0x46464952); pos += 4; // "RIFF"
+      setUint32(view, pos, length - 8); pos += 4;
+      setUint32(view, pos, 0x45564157); pos += 4; // "WAVE"
+      setUint32(view, pos, 0x20746d66); pos += 4; // "fmt "
+      setUint32(view, pos, 16); pos += 4;
+      setUint16(view, pos, 1); pos += 2; // PCM
+      setUint16(view, pos, numOfChan); pos += 2;
+      setUint32(view, pos, buffer.sampleRate); pos += 4;
+      setUint32(view, pos, buffer.sampleRate * 2 * numOfChan); pos += 4;
+      setUint16(view, pos, numOfChan * 2); pos += 2;
+      setUint16(view, pos, 16); pos += 2;
+      setUint32(view, pos, 0x61746164); pos += 4; // "data"
+      setUint32(view, pos, length - pos - 4); pos += 4;
+
+      // Write PCM data
+      for (i = 0; i < buffer.numberOfChannels; i++) {
+        channels.push(buffer.getChannelData(i));
+      }
+
+      while (pos < length) {
+        for (i = 0; i < numOfChan; i++) {
+          sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF) | 0;
+          view.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+
+      return bufferArray;
+
+      function setUint16(view, offset, value) {
+        view.setUint16(offset, value, true);
+      }
+      function setUint32(view, offset, value) {
+        view.setUint32(offset, value, true);
+      }
+    }
+
+    // ==================== PLAYER ====================
+    let currentAudioUrl = null;
+
+    async function playTrack(track, addToQueue = true) {
+      if (!track) return;
+
+      // Stop previous
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
+      }
+
+      if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+        currentAudioUrl = null;
+      }
+
+      currentTrack = track;
+
+      // Show player bar
+      document.getElementById('player-bar').classList.remove('hidden');
+      document.getElementById('player-bar').style.display = 'block';
+
+      // Update player UI
+      updatePlayerUI(track);
+
+      // Prepare audio source
+      let audioSrc;
+
+      if (track.isDemo || !track.audioData) {
+        // Generate demo audio
+        audioSrc = await createDemoAudio(track);
+        currentAudioUrl = audioSrc;
+      } else {
+        // Real uploaded base64 data
+        audioSrc = track.audioData;
+      }
+
+      audioElement.src = audioSrc;
+      audioElement.volume = parseFloat(document.getElementById('player-volume').value) / 100 || 0.8;
+
+      try {
+        await audioElement.play();
+        isPlaying = true;
+        updatePlayIcon();
+        
+        // Increment plays
+        track.plays = (track.plays || 0) + 1;
+        saveToStorage();
+        renderAll();
+        
+        // Analytics
+        updateAnalytics();
+      } catch (e) {
+        console.warn('Playback failed', e);
+        showToast('Playback blocked by browser. Click play again.');
+      }
+
+      // Event listeners
+      audioElement.onended = () => {
+        isPlaying = false;
+        updatePlayIcon();
+        nextTrack();
+      };
+
+      audioElement.ontimeupdate = () => {
+        updateProgress();
+      };
+    }
+
+    function updatePlayerUI(track) {
+      document.getElementById('player-title').textContent = track.title;
+      document.getElementById('player-artist').textContent = artist.name;
+      
+      const coverImg = document.getElementById('player-cover-img');
+      coverImg.src = track.cover || 'https://picsum.photos/id/1015/44/44';
+      
+      // Duration
+      const durEl = document.getElementById('player-duration');
+      const minutes = Math.floor(track.duration / 60);
+      const secs = Math.floor(track.duration % 60);
+      durEl.textContent = `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function updateProgress() {
+      if (!audioElement || !currentTrack) return;
+      
+      const progress = document.getElementById('player-progress');
+      const currentTimeEl = document.getElementById('player-current-time');
+      
+      if (audioElement.duration) {
+        const percent = (audioElement.currentTime / audioElement.duration) * 100;
+        progress.value = percent;
+        
+        const curMin = Math.floor(audioElement.currentTime / 60);
+        const curSec = Math.floor(audioElement.currentTime % 60);
+        currentTimeEl.textContent = `${curMin}:${curSec < 10 ? '0' : ''}${curSec}`;
+      }
+    }
+
+    function seekAudio(percent) {
+      if (!audioElement || !audioElement.duration) return;
+      audioElement.currentTime = (percent / 100) * audioElement.duration;
+    }
+
+    function setVolume(val) {
+      if (audioElement) {
+        audioElement.volume = parseFloat(val) / 100;
+      }
+    }
+
+    function togglePlay() {
+      if (!currentTrack) {
+        // Play first track from library
+        if (tracks.length > 0) {
+          playTrack(tracks[0]);
+        }
+        return;
+      }
+
+      if (isPlaying) {
+        audioElement.pause();
+        isPlaying = false;
+      } else {
+        audioElement.play().then(() => {
+          isPlaying = true;
+        }).catch(() => {});
+      }
+      updatePlayIcon();
+    }
+
+    function updatePlayIcon() {
+      const icon = document.getElementById('player-play-icon');
+      if (isPlaying) {
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+      } else {
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+      }
+    }
+
+    function nextTrack() {
+      if (!currentTrack) return;
+      
+      const currentIdx = tracks.findIndex(t => t.id === currentTrack.id);
+      let nextIdx = currentIdx + 1;
+      
+      if (nextIdx >= tracks.length) nextIdx = 0;
+      
+      playTrack(tracks[nextIdx]);
+    }
+
+    function prevTrack() {
+      if (!currentTrack) return;
+      const currentIdx = tracks.findIndex(t => t.id === currentTrack.id);
+      let prevIdx = currentIdx - 1;
+      if (prevIdx < 0) prevIdx = tracks.length - 1;
+      playTrack(tracks[prevIdx]);
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderAll() {
+      renderHomePopular();
+      renderLibrary();
+      renderPlaylists();
+      renderStudioTracks();
+      updateHomeStats();
+      updateAnalytics();
+      updateTopBar();
+    }
+
+    function updateTopBar() {
+      document.getElementById('top-artist-name').textContent = artist.name;
+      document.getElementById('sidebar-artist-name').textContent = artist.name;
+      document.getElementById('top-artist-avatar').src = artist.avatar;
+    }
+
+    function updateHomeStats() {
+      document.getElementById('hero-listeners').textContent = artist.followers.toLocaleString('de-DE');
+      document.getElementById('home-total-tracks').textContent = tracks.length;
+      
+      const totalPlays = tracks.reduce((sum, t) => sum + (t.plays || 0), 0);
+      document.getElementById('home-total-plays').textContent = (totalPlays / 1000000).toFixed(1) + 'm';
+      
+      document.getElementById('home-playlists-count').textContent = playlists.length;
+    }
+
+    function renderHomePopular() {
+      const container = document.getElementById('home-popular-tracks');
+      container.innerHTML = '';
+      
+      const sorted = [...tracks].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 5);
+      
+      sorted.forEach(track => {
+        const el = document.createElement('div');
+        el.className = `bg-zinc-900 border border-zinc-800 rounded-2xl p-3 cursor-pointer hover:border-zinc-600 transition-all group`;
+        el.innerHTML = `
+          <div class="relative">
+            <img src="${track.cover || 'https://picsum.photos/id/1015/300/300'}" class="w-full aspect-square object-cover rounded-xl mb-3" alt="">
+            <button onclick="event.stopImmediatePropagation(); playTrack(${JSON.stringify(track)})" 
+                    class="absolute bottom-3 right-3 w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100">
+              <i class="fa-solid fa-play text-white ml-0.5 text-sm"></i>
+            </button>
+          </div>
+          <div class="font-semibold text-sm truncate">${track.title}</div>
+          <div class="text-xs text-zinc-400">${track.genre} • ${(track.plays || 0).toLocaleString('de-DE')} plays</div>
+        `;
+        el.onclick = () => playTrack(track);
+        container.appendChild(el);
+      });
+    }
+
+    function renderLibrary(filteredTracks = null) {
+      const container = document.getElementById('library-tracks');
+      container.innerHTML = '';
+      
+      const data = filteredTracks || tracks;
+      
+      if (data.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-zinc-400">No tracks yet. Go to the Studio to upload your first song.</div>`;
+        return;
+      }
+
+      data.forEach(track => {
+        const row = document.createElement('div');
+        row.className = `track-row flex items-center gap-x-4 px-4 py-3 rounded-2xl border border-transparent hover:border-zinc-700`;
+        
+        const mins = Math.floor((track.duration || 180) / 60);
+        const secs = (track.duration || 180) % 60;
+        
+        row.innerHTML = `
+          <div class="flex items-center gap-x-4 flex-1 min-w-0">
+            <div class="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800">
+              <img src="${track.cover || 'https://picsum.photos/id/1015/44/44'}" class="w-full h-full object-cover">
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-medium truncate">${track.title}</div>
+              <div class="text-xs text-zinc-400">${track.album || 'Single'} • ${track.genre}</div>
+            </div>
+          </div>
+          
+          <div class="text-xs text-zinc-400 w-24 text-right tabular-nums hidden md:block">${mins}:${secs < 10 ? '0' : ''}${secs}</div>
+          
+          <div class="text-xs text-emerald-400 w-20 text-right hidden md:block">${(track.plays || 0).toLocaleString('de-DE')}</div>
+          
+          <div class="flex items-center gap-x-1">
+            <button onclick="event.stopImmediatePropagation(); playTrack(${JSON.stringify(track)})" 
+                    class="px-3 py-1 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-2xl flex items-center gap-x-1">
+              <i class="fa-solid fa-play text-xs"></i>
+            </button>
+            
+            <button onclick="event.stopImmediatePropagation(); addToPlaylistPrompt(${JSON.stringify(track.id)})" 
+                    class="px-2 py-1 text-xs border border-zinc-700 hover:bg-zinc-800 rounded-2xl">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            
+            <button onclick="event.stopImmediatePropagation(); editTrack('${track.id}')" class="px-2 py-1 text-xs text-zinc-400 hover:text-white">
+              <i class="fa-solid fa-edit"></i>
+            </button>
+          </div>
+        `;
+        
+        row.onclick = () => playTrack(track);
+        container.appendChild(row);
+      });
+      
+      document.getElementById('library-count').textContent = data.length;
+    }
+
+    function filterLibrary() {
+      const q = document.getElementById('library-search').value.toLowerCase().trim();
+      if (!q) {
+        renderLibrary();
+        return;
+      }
+      
+      const filtered = tracks.filter(t => 
+        t.title.toLowerCase().includes(q) || 
+        (t.album || '').toLowerCase().includes(q) ||
+        t.genre.toLowerCase().includes(q)
+      );
+      renderLibrary(filtered);
+    }
+
+    function renderPlaylists() {
+      const container = document.getElementById('playlists-grid');
+      container.innerHTML = '';
+      
+      playlists.forEach(playlist => {
+        const trackCount = playlist.trackIds.length;
+        const card = document.createElement('div');
+        card.className = `glass border border-zinc-700 hover:border-zinc-400 rounded-3xl p-4 cursor-pointer`;
+        
+        card.innerHTML = `
+          <div class="font-semibold">${playlist.name}</div>
+          <div class="text-xs text-zinc-400">${trackCount} tracks</div>
+          
+          <div class="mt-4 flex -space-x-2">
+            ${playlist.trackIds.slice(0, 4).map(id => {
+              const tr = tracks.find(t => t.id === id);
+              return tr ? `<img src="${tr.cover || 'https://picsum.photos/id/1015/28/28'}" class="w-7 h-7 rounded-lg ring-2 ring-[#111114] object-cover">` : '';
+            }).join('')}
+          </div>
+        `;
+        
+        card.onclick = () => showPlaylist(playlist.id);
+        container.appendChild(card);
+      });
+    }
+
+    function createNewPlaylist() {
+      const name = prompt("Playlist name:");
+      if (!name) return;
+      
+      const newPlaylist = {
+        id: 'p' + Date.now(),
+        name: name,
+        trackIds: []
+      };
+      
+      playlists.push(newPlaylist);
+      saveToStorage();
+      renderPlaylists();
+      showToast(`Playlist "${name}" created`);
+    }
+
+    function showPlaylist(playlistId) {
+      const pl = playlists.find(p => p.id === playlistId);
+      if (!pl) return;
+      
+      const modal = document.createElement('div');
+      modal.className = `fixed inset-0 bg-black/70 flex items-center justify-center z-[80]`;
+      modal.innerHTML = `
+        <div class="glass w-full max-w-lg mx-4 border border-zinc-700 rounded-3xl overflow-hidden">
+          <div class="px-6 pt-6 pb-4">
+            <div class="flex justify-between">
+              <div>
+                <div class="font-semibold text-2xl">${pl.name}</div>
+                <div class="text-xs text-zinc-400">${pl.trackIds.length} tracks</div>
+              </div>
+              <button onclick="this.closest('.fixed').remove()" class="text-xl text-zinc-400">×</button>
+            </div>
+          </div>
+          
+          <div class="px-6 pb-6 max-h-[380px] overflow-auto space-y-1" id="playlist-tracks-list">
+            <!-- tracks go here -->
+          </div>
+          
+          <div class="border-t border-zinc-700 px-6 py-4 flex gap-3">
+            <button onclick="playPlaylist('${pl.id}'); this.closest('.fixed').remove()" class="flex-1 py-2.5 bg-white text-black font-semibold rounded-3xl text-sm">Play all</button>
+            <button onclick="deletePlaylist('${pl.id}'); this.closest('.fixed').remove()" class="px-6 py-2.5 text-sm border border-red-900/60 hover:bg-red-900/10 text-red-400 rounded-3xl">Delete</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Render tracks in modal
+      const listContainer = modal.querySelector('#playlist-tracks-list');
+      
+      if (pl.trackIds.length === 0) {
+        listContainer.innerHTML = `<div class="text-center py-6 text-sm text-zinc-400">This playlist is empty. Add tracks from the Library.</div>`;
+      } else {
+        pl.trackIds.forEach((trackId, index) => {
+          const track = tracks.find(t => t.id === trackId);
+          if (!track) return;
+          
+          const row = document.createElement('div');
+          row.className = `flex items-center justify-between gap-x-3 px-3 py-2 rounded-2xl hover:bg-zinc-800`;
+          row.innerHTML = `
+            <div class="flex items-center gap-x-3 flex-1 min-w-0 cursor-pointer">
+              <div class="w-8 h-8 flex-shrink-0 rounded overflow-hidden">
+                <img src="${track.cover || 'https://picsum.photos/id/1015/32/32'}" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm font-medium truncate">${track.title}</div>
+                <div class="text-xs text-zinc-400">${track.genre}</div>
+              </div>
+            </div>
+            <button class="text-xs text-red-400 px-2 py-px hover:bg-red-900/20 rounded" onclick="event.stopImmediatePropagation(); removeFromPlaylist('${pl.id}', '${trackId}', this)">Remove</button>
+          `;
+          
+          row.onclick = () => {
+            modal.remove();
+            playTrack(track);
+          };
+          
+          listContainer.appendChild(row);
+        });
+      }
+    }
+
+    function removeFromPlaylist(playlistId, trackId, el) {
+      const pl = playlists.find(p => p.id === playlistId);
+      if (!pl) return;
+      
+      pl.trackIds = pl.trackIds.filter(id => id !== trackId);
+      saveToStorage();
+      el.closest('div').remove();
+      
+      // Refresh main view if open
+      if (document.getElementById('section-playlists').classList.contains('active')) {
+        renderPlaylists();
+      }
+    }
+
+    function addToPlaylistPrompt(trackId) {
+      if (playlists.length === 0) {
+        const name = prompt("No playlists yet. Create one first:");
+        if (!name) return;
+        const newPl = { id: 'p' + Date.now(), name, trackIds: [trackId] };
+        playlists.push(newPl);
+        saveToStorage();
+        renderPlaylists();
+        showToast("Playlist created and track added!");
+        return;
+      }
+      
+      const plNames = playlists.map((p, idx) => `${idx + 1}. ${p.name}`).join('\n');
+      const choice = prompt(`Add to which playlist?\n\n${plNames}`);
+      
+      if (!choice) return;
+      
+      const idx = parseInt(choice) - 1;
+      if (playlists[idx]) {
+        if (!playlists[idx].trackIds.includes(trackId)) {
+          playlists[idx].trackIds.push(trackId);
+          saveToStorage();
+          renderPlaylists();
+          showToast(`Added to "${playlists[idx].name}"`);
+        }
+      }
+    }
+
+    function playPlaylist(playlistId) {
+      const pl = playlists.find(p => p.id === playlistId);
+      if (!pl || pl.trackIds.length === 0) return;
+      
+      const firstTrack = tracks.find(t => t.id === pl.trackIds[0]);
+      if (firstTrack) {
+        queue = pl.trackIds.map(id => tracks.find(t => t.id === id)).filter(Boolean);
+        currentQueueIndex = 0;
+        playTrack(firstTrack);
+      }
+    }
+
+    function deletePlaylist(id) {
+      if (!confirm("Delete this playlist?")) return;
+      playlists = playlists.filter(p => p.id !== id);
+      saveToStorage();
+      renderPlaylists();
+    }
+
+    // ==================== UPLOAD ====================
+    async function uploadTrack() {
+      const title = document.getElementById('upload-title').value || "Untitled";
+      const album = document.getElementById('upload-album').value || "Single";
+      const genre = document.getElementById('upload-genre').value;
+      
+      const audioInput = document.getElementById('upload-audio');
+      const coverInput = document.getElementById('upload-cover');
+      
+      if (!audioInput.files.length) {
+        showToast("Please select an MP3 file");
+        return;
+      }
+      
+      const audioFile = audioInput.files[0];
+      
+      showToast("Uploading to studio...");
+      
+      // Read audio as base64
+      const audioReader = new FileReader();
+      audioReader.onload = async function(e) {
+        const audioBase64 = e.target.result;
+        
+        // Get duration
+        const tempAudio = new Audio();
+        tempAudio.src = audioBase64;
+        
+        await new Promise(res => {
+          tempAudio.onloadedmetadata = () => {
+            const duration = Math.floor(tempAudio.duration);
+            
+            // Cover
+            let coverData = `https://picsum.photos/id/${Math.floor(Math.random()*200)}/300/300`;
+            
+            if (coverInput.files.length) {
+              const coverReader = new FileReader();
+              coverReader.onload = function(ev) {
+                coverData = ev.target.result;
+                finishUpload();
+              };
+              coverReader.readAsDataURL(coverInput.files[0]);
+            } else {
+              finishUpload();
+            }
+            
+            function finishUpload() {
+              const newTrack = {
+                id: 't' + Date.now(),
+                title: title,
+                album: album,
+                genre: genre,
+                duration: duration || 180,
+                plays: 0,
+                uploadedAt: new Date().toISOString().split('T')[0],
+                cover: coverData,
+                audioData: audioBase64,
+                isDemo: false
+              };
+              
+              tracks.unshift(newTrack);
+              saveToStorage();
+              
+              // Clear form
+              document.getElementById('upload-title').value = '';
+              document.getElementById('upload-album').value = '';
+              audioInput.value = '';
+              coverInput.value = '';
+              document.getElementById('audio-filename').textContent = '';
+              
+              renderAll();
+              showToast("Track uploaded successfully to your catalog!");
+              showSection('library');
+            }
+          };
+        });
+      };
+      
+      audioReader.readAsDataURL(audioFile);
+    }
+
+    // File name preview + drag & drop (premium preview feel)
+    function setupUploadListeners() {
+      const audioInput = document.getElementById('upload-audio');
+      const dropZone = document.getElementById('drop-zone');
+      const nameEl = document.getElementById('audio-filename');
+
+      if (audioInput) {
+        audioInput.addEventListener('change', function() {
+          if (this.files[0]) {
+            nameEl.textContent = this.files[0].name;
+          }
+        });
+      }
+
+      if (dropZone && audioInput) {
+        ['dragenter', 'dragover'].forEach(evt => {
+          dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('!border-indigo-400', 'bg-zinc-900');
+          });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+          dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('!border-indigo-400', 'bg-zinc-900');
+          });
+        });
+        dropZone.addEventListener('drop', (e) => {
+          const file = e.dataTransfer.files[0];
+          if (file && (file.type.includes('audio') || file.name.match(/\.(mp3|wav|m4a)$/i))) {
+            // Assign to the hidden input for the existing upload flow
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            audioInput.files = dt.files;
+            nameEl.textContent = file.name;
+          } else {
+            showToast("Please drop a valid MP3 or WAV file");
+          }
+        });
+      }
+    }
+
+    // ==================== EDIT TRACK ====================
+    function editTrack(trackId) {
+      const track = tracks.find(t => t.id === trackId);
+      if (!track) return;
+      
+      const newTitle = prompt("Track title:", track.title);
+      if (newTitle === null) return;
+      
+      const newAlbum = prompt("Album:", track.album || '');
+      if (newAlbum === null) return;
+      
+      const newGenre = prompt("Genre:", track.genre);
+      if (newGenre === null) return;
+      
+      track.title = newTitle;
+      track.album = newAlbum;
+      track.genre = newGenre;
+      
+      saveToStorage();
+      renderAll();
+      showToast("Track updated");
+    }
+
+    // ==================== ANALYTICS ====================
+    function updateAnalytics() {
+      const totalStreams = tracks.reduce((sum, t) => sum + (t.plays || 0), 0);
+      document.getElementById('analytics-total-streams').textContent = totalStreams.toLocaleString('de-DE');
+      
+      document.getElementById('analytics-monthly').textContent = artist.followers.toLocaleString('de-DE');
+      
+      // Top genre
+      const genreCounts = {};
+      tracks.forEach(t => {
+        genreCounts[t.genre] = (genreCounts[t.genre] || 0) + (t.plays || 0);
+      });
+      
+      let topGenre = 'Electronic';
+      let max = 0;
+      Object.keys(genreCounts).forEach(g => {
+        if (genreCounts[g] > max) {
+          max = genreCounts[g];
+          topGenre = g;
+        }
+      });
+      document.getElementById('analytics-top-genre').textContent = topGenre;
+      
+      // Top tracks list
+      const topContainer = document.getElementById('analytics-top-tracks');
+      topContainer.innerHTML = '';
+      
+      const sorted = [...tracks].sort((a,b) => (b.plays||0) - (a.plays||0)).slice(0, 5);
+      
+      sorted.forEach((t, i) => {
+        const div = document.createElement('div');
+        div.className = `flex justify-between items-center text-sm py-1`;
+        div.innerHTML = `
+          <div class="flex items-center gap-x-3">
+            <div class="text-xs text-zinc-400 w-4">${i+1}</div>
+            <div class="font-medium">${t.title}</div>
+          </div>
+          <div class="font-mono text-xs text-emerald-400">${(t.plays || 0).toLocaleString('de-DE')}</div>
+        `;
+        topContainer.appendChild(div);
+      });
+    }
+
+    // ==================== SECTIONS ====================
+    function showSection(section) {
+      // Hide all
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      
+      // Show target
+      const target = document.getElementById('section-' + section);
+      if (target) target.classList.add('active');
+      
+      // Update nav
+      document.querySelectorAll('[id^="nav-"]').forEach(n => n.classList.remove('nav-active'));
+      const nav = document.getElementById('nav-' + section);
+      if (nav) nav.classList.add('nav-active');
+      
+      // Special renders
+      if (section === 'library') {
+        renderLibrary();
+      }
+      if (section === 'playlists') {
+        renderPlaylists();
+      }
+      if (section === 'studio') {
+        renderStudioTracks();
+      }
+      if (section === 'analytics') {
+        updateAnalytics();
+      }
+
+      // Update mobile bottom nav active state
+      document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-section') === section) {
+          item.classList.add('active');
+        }
+      });
+    }
+
+    function updateMobileNav(el) {
+      document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function renderStudioTracks() {
+      const container = document.getElementById('studio-tracks-list');
+      container.innerHTML = '';
+      
+      if (tracks.length === 0) {
+        container.innerHTML = `<div class="text-sm text-zinc-400 p-4">Your catalog is empty. Upload your first track above.</div>`;
+        return;
+      }
+      
+      document.getElementById('studio-track-count').textContent = `(${tracks.length})`;
+      
+      tracks.forEach(track => {
+        const el = document.createElement('div');
+        el.className = `flex items-center justify-between border border-zinc-700 rounded-2xl px-5 py-3`;
+        
+        const mins = Math.floor((track.duration || 0) / 60);
+        const secs = Math.floor((track.duration || 0) % 60);
+        
+        el.innerHTML = `
+          <div class="flex items-center gap-x-4 flex-1">
+            <img src="${track.cover || 'https://picsum.photos/id/1015/40/40'}" class="w-9 h-9 rounded object-cover">
+            <div>
+              <div class="font-medium">${track.title}</div>
+              <div class="text-xs text-zinc-400">${track.album} • ${track.genre} • ${mins}:${secs < 10 ? '0' : ''}${secs}</div>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-x-4 text-sm">
+            <div class="text-emerald-400 font-mono">${(track.plays || 0).toLocaleString('de-DE')} plays</div>
+            
+            <button onclick="editTrack('${track.id}')" class="text-xs px-3 py-1 border border-zinc-600 rounded-2xl hover:bg-zinc-800">Edit</button>
+            <button onclick="deleteTrack('${track.id}')" class="text-xs px-3 py-1 text-red-400 border border-red-900/50 rounded-2xl hover:bg-red-900/10">Delete</button>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function deleteTrack(id) {
+      if (!confirm("Delete this track permanently?")) return;
+      
+      tracks = tracks.filter(t => t.id !== id);
+      
+      // Remove from playlists too
+      playlists.forEach(pl => {
+        pl.trackIds = pl.trackIds.filter(tid => tid !== id);
+      });
+      
+      saveToStorage();
+      renderAll();
+      showToast("Track removed from catalog");
+    }
+
+    // ==================== PROFILE ====================
+    function showProfileModal() {
+      const modal = document.createElement('div');
+      modal.className = `fixed inset-0 bg-black/70 flex items-end lg:items-center justify-center z-[80]`;
+      modal.innerHTML = `
+        <div class="bg-[#111114] w-full lg:w-[440px] rounded-t-3xl lg:rounded-3xl border border-zinc-700 p-6">
+          <div class="flex justify-between mb-6">
+            <div class="font-semibold text-xl">Artist Profile</div>
+            <button onclick="this.closest('.fixed').remove()" class="text-2xl leading-none text-zinc-400">×</button>
+          </div>
+          
+          <div class="space-y-5">
+            <div>
+              <label class="block text-xs mb-1.5 text-zinc-300">ARTIST NAME</label>
+              <input id="profile-name" value="${artist.name}" class="bg-zinc-900 w-full px-4 h-10 rounded-2xl border border-zinc-700">
+            </div>
+            
+            <div>
+              <label class="block text-xs mb-1.5 text-zinc-300">BIO</label>
+              <textarea id="profile-bio" class="bg-zinc-900 w-full px-4 py-2 rounded-2xl border border-zinc-700 h-20 text-sm">${artist.bio}</textarea>
+            </div>
+            
+            <div>
+              <label class="block text-xs mb-1.5 text-zinc-300">AVATAR URL (or upload)</label>
+              <input id="profile-avatar" value="${artist.avatar}" class="bg-zinc-900 w-full px-4 h-10 rounded-2xl border border-zinc-700 text-sm">
+            </div>
+          </div>
+          
+          <div class="flex gap-3 mt-7">
+            <button onclick="saveProfile(this)" class="flex-1 py-3 bg-white text-black font-semibold rounded-3xl">Save changes</button>
+            <button onclick="this.closest('.fixed').remove()" class="px-6 py-3 border border-zinc-700 rounded-3xl">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function saveProfile(btn) {
+      const modal = btn.closest('.fixed');
+      
+      artist.name = document.getElementById('profile-name').value;
+      artist.bio = document.getElementById('profile-bio').value;
+      artist.avatar = document.getElementById('profile-avatar').value || artist.avatar;
+      
+      saveToStorage();
+      updateTopBar();
+      modal.remove();
+      showToast("Profile updated");
+      renderAll();
+    }
+
+    // ==================== DATA MANAGEMENT ====================
+    function exportData() {
+      const data = {
+        artist,
+        tracks,
+        playlists,
+        exportedAt: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `aether-backup-${artist.name.toLowerCase().replace(/\s/g, '-')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast("Library exported successfully");
+    }
+
+    function resetAllData() {
+      if (!confirm("Reset everything? All uploads and playlists will be lost.")) return;
+      
+      localStorage.removeItem('aether_artist');
+      localStorage.removeItem('aether_tracks');
+      localStorage.removeItem('aether_playlists');
+      
+      tracks = [];
+      playlists = [];
+      
+      seedDemoData();
+      renderAll();
+      showToast("Demo data reset");
+    }
+
+    function updateAnalyticsOnPlay() {
+      // Called from play function already
+    }
+
+    // ==================== INIT ====================
+    function init() {
+      initTailwind();
+      
+      loadFromStorage();
+      seedDemoData();
+      
+      // Update UI
+      updateTopBar();
+      renderAll();
+      setupUploadListeners();
+      
+      // Default to home
+      document.getElementById('section-home').classList.add('active');
+      document.getElementById('nav-home').classList.add('nav-active');
+      
+      // Volume default
+      const vol = document.getElementById('player-volume');
+      if (vol) vol.value = 75;
+      
+      // Keyboard controls
+      document.addEventListener('keydown', function(e) {
+        if (e.key === " " && document.activeElement.tagName === "BODY") {
+          e.preventDefault();
+          togglePlay();
+        }
+        if (e.key === "ArrowRight") nextTrack();
+        if (e.key === "ArrowLeft") prevTrack();
+      });
+      
+      // Make sure player hidden initially
+      const playerBar = document.getElementById('player-bar');
+      playerBar.style.display = 'none';
+      
+      // Welcome toast
+      setTimeout(() => {
+        if (tracks.length > 0 && !localStorage.getItem('aether_welcomed')) {
+          showToast("Welcome to AETHER. Upload your first track in the Studio.");
+          localStorage.setItem('aether_welcomed', '1');
+        }
+      }, 1800);
+      
+      // Expose for debugging
+      window.AETHER = { tracks, playlists, artist, playTrack, resetAllData };
+      
+      console.log('%c[AETHER] High-class Music Studio initialized. All data stored locally.', 'color:#52525b');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.remove('hidden');
+      toast.style.display = 'flex';
+      
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2600);
+    }
+
+    // Boot
+    window.onload = init;
+  </script>
+</body>
+</html>

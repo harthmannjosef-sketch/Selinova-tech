@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELINOVA-TECH Medien Architektur E.U – Webseiten kaufen & mieten | assetmarkt.at | Professioneller Marktplatz</title>
+<meta name="description" content="SELINOVA-TECH Medien Architektur E.U: Professioneller Marktplatz für den Kauf und die Miete von Webseiten, E-Commerce, SaaS, Blogs und Apps. Geprüfte digitale Assets aus Österreich/Wien.">
+<meta name="keywords" content="Webseite kaufen, Webseite mieten, Online Business kaufen, E-Commerce kaufen, SaaS kaufen, Website Marktplatz, digitale Assets, Webprojekt verkaufen, SELINOVA-TECH">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="SELINOVA-TECH – Webseiten kaufen & mieten">
+<meta property="og:description" content="Geprüfte Webseiten-Angebote: E-Commerce, SaaS, Blogs, Apps kaufen oder mieten. SELINOVA-TECH Medien Architektur E.U, Wien.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://selinova-tech.at">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"SELINOVA-TECH Mainboard","description":"Marktplatz für Webseiten-Kauf und -Miete","url":"https://selinova-tech.at/mainboard","publisher":{"@type":"Organization","name":"SELINOVA-TECH","url":"https://selinova-tech.at"}}
+</script>
+<style>
+:root{
+  --bg:#07080d;--bg2:#0e1018;--bg3:#161921;--card:#13151e;
+  --a1:#00e5ff;--a2:#7c3aed;--a3:#10b981;--a4:#f59e0b;--a5:#ef4444;
+  --t1:#f0f2ff;--t2:#8892b0;--t3:#4a5568;
+  --border:#1a1d2e;
+  --fh:'Syne',sans-serif;--fm:'Space Mono',monospace;--fb:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,8,13,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;height:70px;gap:32px;}
+.nav-logo{font-family:var(--fh);font-weight:800;font-size:1.25rem;display:flex;align-items:center;gap:10px;margin-right:auto;}
+.nav-logo .icon{width:32px;height:32px;background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.nav-link{font-size:.85rem;color:var(--t2);transition:.2s;font-family:var(--fm);}
+.nav-link:hover,.nav-link.active{color:var(--t1);}
+.nav-actions{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:.82rem;cursor:pointer;border:none;font-family:var(--fb);}
+.btn-primary{background:var(--a1);color:#000;font-weight:600;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--t2);}
+.btn-outline:hover{border-color:var(--a1);color:var(--t1);}
+
+/* HERO */
+.hero{padding:80px 40px 60px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse,rgba(0,229,255,.06),transparent 70%);pointer-events:none;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,229,255,.3);color:var(--a1);padding:5px 14px;border-radius:20px;font-size:.72rem;font-family:var(--fm);margin-bottom:20px;}
+.hero h1{font-family:var(--fh);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1.1;margin-bottom:16px;}
+.hero h1 span{background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:1.05rem;color:var(--t2);max-width:580px;margin:0 auto 32px;line-height:1.7;}
+.hero-stats{display:flex;justify-content:center;gap:48px;margin-top:40px;}
+.h-stat{text-align:center;}
+.h-stat-num{font-family:var(--fh);font-size:2rem;font-weight:800;color:var(--a1);}
+.h-stat-lab{font-size:.72rem;color:var(--t2);font-family:var(--fm);}
+
+/* FILTER BAR */
+.filter-bar{padding:20px 40px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 16px;flex:1;min-width:240px;}
+.search-wrap input{background:none;border:none;outline:none;color:var(--t1);font-family:var(--fb);font-size:.88rem;width:100%;}
+.filter-chip{padding:8px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:.75rem;font-family:var(--fm);cursor:pointer;color:var(--t2);transition:.2s;white-space:nowrap;}
+.filter-chip:hover,.filter-chip.active{background:rgba(0,229,255,.1);border-color:var(--a1);color:var(--a1);}
+.sort-select{background:var(--bg3);border:1px solid var(--border);color:var(--t2);padding:9px 14px;border-radius:8px;font-size:.78rem;font-family:var(--fm);outline:none;cursor:pointer;margin-left:auto;}
+
+/* SOURCE BADGES */
+.source-strip{padding:16px 40px;display:flex;align-items:center;gap:12px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.source-badge{display:flex;align-items:center;gap:7px;padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:.72rem;font-family:var(--fm);color:var(--t2);white-space:nowrap;cursor:pointer;transition:.2s;}
+.source-badge:hover{border-color:var(--a1);color:var(--t1);}
+.source-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--a3);}
+.source-label{font-size:.65rem;color:var(--t3);margin-right:6px;}
+
+/* CARDS GRID */
+.listings{padding:32px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:22px;}
+/* CARD */
+.listing-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:.25s;display:flex;flex-direction:column;}
+.listing-card:hover{border-color:rgba(0,229,255,.4);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,229,255,.06);}
+.card-header{padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.card-type-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.card-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.62rem;font-family:var(--fm);}
+.badge-sell{background:rgba(16,185,129,.15);color:var(--a3);}
+.badge-rent{background:rgba(0,229,255,.12);color:var(--a1);}
+.badge-hot{background:rgba(245,158,11,.15);color:var(--a4);}
+.badge-new{background:rgba(124,58,237,.15);color:#a78bfa;}
+.badge-verified{background:rgba(16,185,129,.1);color:var(--a3);}
+.card-source{font-size:.65rem;font-family:var(--fm);color:var(--t3);display:flex;align-items:center;gap:5px;}
+.card-source .dot{width:5px;height:5px;border-radius:50%;background:var(--a3);}
+.card-body{padding:0 20px 16px;flex:1;}
+.card-title{font-family:var(--fh);font-size:1rem;font-weight:700;margin-bottom:6px;line-height:1.3;}
+.card-desc{font-size:.78rem;color:var(--t2);line-height:1.6;margin-bottom:12px;}
+.card-tech{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.tech-tag{padding:3px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;font-size:.6rem;font-family:var(--fm);color:var(--t3);}
+.card-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.meta-item{background:var(--bg3);border-radius:8px;padding:8px 10px;}
+.meta-label{font-size:.6rem;color:var(--t3);font-family:var(--fm);}
+.meta-value{font-size:.82rem;font-weight:600;font-family:var(--fm);}
+.card-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.price-main{font-family:var(--fh);font-size:1.35rem;font-weight:800;}
+.price-sub{font-size:.65rem;color:var(--t2);}
+.card-actions{display:flex;gap:8px;}
+.card-btn{padding:8px 16px;border-radius:8px;font-size:.75rem;font-family:var(--fb);font-weight:500;cursor:pointer;border:none;transition:.2s;}
+.card-btn-primary{background:var(--a1);color:#000;}
+.card-btn-primary:hover{opacity:.85;}
+.card-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--t2);}
+.card-btn-ghost:hover{border-color:var(--a1);color:var(--a1);}
+
+/* SEO META STRIP */
+.seo-meta-strip{margin:10px 20px 0;padding:8px 10px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:8px;}
+.seo-meta-strip .seo-row{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--t3);font-family:var(--fm);margin-bottom:3px;}
+.seo-meta-strip .seo-row:last-child{margin-bottom:0;}
+.seo-meta-strip i{color:var(--a1);width:12px;}
+
+/* CONTRACT STRIP */
+.contract-strip{margin:0 20px 14px;padding:8px 12px;background:rgba(16,185,129,.05);border:1px dashed rgba(16,185,129,.3);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:.7rem;color:var(--a3);}
+.contract-strip a{color:var(--a3);text-decoration:underline;cursor:pointer;}
+
+/* SECTION TITLES */
+.section-head{padding:24px 40px 0;display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-family:var(--fh);font-size:1.25rem;font-weight:700;}
+.section-sub{font-size:.78rem;color:var(--t2);}
+
+/* PAGINATION */
+.pagination{padding:20px 40px 40px;display:flex;justify-content:center;gap:8px;}
+.page-btn{width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:var(--fm);cursor:pointer;color:var(--t2);transition:.2s;}
+.page-btn:hover,.page-btn.active{background:var(--a1);color:#000;border-color:var(--a1);}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px;}
+.foot-col h4{font-family:var(--fh);font-size:.88rem;margin-bottom:12px;}
+.foot-col a{display:block;font-size:.78rem;color:var(--t2);margin-bottom:8px;transition:.2s;}
+.foot-col a:hover{color:var(--a1);}
+.foot-bottom{text-align:center;padding:20px;font-size:.65rem;color:var(--t3);font-family:var(--fm);border-top:1px solid var(--border);}
+@media(max-width:900px){.listings{grid-template-columns:1fr;}nav{padding:0 20px;gap:16px;}.hero{padding:50px 20px 40px;}.filter-bar,.listings,.section-head{padding-left:20px;padding-right:20px;}footer{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><img src="selinova-gate-logo.png" alt="SELINOVA-TECH" style="height: 32px; width: auto; vertical-align: middle;"></div>
+  <!-- Kein Admin-Link für öffentliche Besucher. Admin-Bereich ist nicht über die öffentliche Seite erreichbar. -->
+  <a href="#" class="nav-link active">Mainboard</a>
+  <a href="unterseite1.html" class="nav-link">Unterseiten</a>
+  <a href="#" class="nav-link">Verträge</a>
+  <div class="nav-actions">
+    <button class="btn btn-outline"><i class="fa-solid fa-bell"></i></button>
+    <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Angebot einstellen</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--a3);"></span>Live-Marktplatz · 1.247 aktive Angebote</div>
+  <h1>Webseiten <span>kaufen & mieten</span><br>auf einem Marktplatz</h1>
+  <p>Geprüfte digitale Assets von Flippa, Sedo, Empire Flippers, BizBuySell und mehr – direkt vergleichen, kontaktieren, Vertrag downloaden.</p>
+
+  <!-- Campaign Banner -->
+  <a href="kampange.html" style="display:inline-block;margin:14px 0 0;background:linear-gradient(90deg,#f59e0b,#ef4444);color:white;padding:10px 22px;border-radius:8px;font-weight:700;font-size:.9rem;text-decoration:none;">
+    🔥 SOMMER AUFARBEITUNGS ANGEBOT – -75% AUF ALLE ANGEBOTE BIS 01.09.2026
+  </a>
+
+  <div style="display:flex;justify-content:center;gap:12px;">
+    <button class="btn btn-primary" style="padding:13px 28px;font-size:.95rem;"><i class="fa-solid fa-magnifying-glass"></i> Angebote durchsuchen</button>
+    <button class="btn btn-outline" style="padding:13px 28px;font-size:.95rem;"><i class="fa-solid fa-file-contract"></i> Vertrag ansehen</button>
+  </div>
+  <div class="hero-stats">
+    <div class="h-stat"><div class="h-stat-num">1.247</div><div class="h-stat-lab">AKTIVE ANGEBOTE</div></div>
+    <div class="h-stat"><div class="h-stat-num">€4.2M</div><div class="h-stat-lab">HANDELSVOLUMEN</div></div>
+    <div class="h-stat"><div class="h-stat-num">8.9K</div><div class="h-stat-lab">REGISTRIERTE NUTZER</div></div>
+    <div class="h-stat"><div class="h-stat-num">98%</div><div class="h-stat-lab">VERIFIZIERT</div></div>
+  </div>
+</section>
+
+<!-- SOURCE STRIP -->
+<div class="source-strip">
+  <span class="source-label">QUELLEN:</span>
+  <div class="source-badge"><span class="dot"></span>Flippa</div>
+  <div class="source-badge"><span class="dot"></span>Sedo</div>
+  <div class="source-badge"><span class="dot"></span>Empire Flippers</div>
+  <div class="source-badge"><span class="dot"></span>BizBuySell</div>
+  <div class="source-badge"><span class="dot"></span>MicroAcquire</div>
+  <div class="source-badge"><span class="dot"></span>FE International</div>
+  <div class="source-badge"><span class="dot"></span>Quiet Light</div>
+  <div class="source-badge"><span class="dot"></span>Motion Invest</div>
+  <div class="source-badge"><span class="dot"></span>Latona's</div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+  <div class="search-wrap"><i class="fa-solid fa-search" style="color:var(--t3);font-size:.8rem;"></i><input placeholder="Webseite, Technologie, Nische suchen…"></div>
+  <div class="filter-chip active">Alle</div>
+  <div class="filter-chip">Verkauf</div>
+  <div class="filter-chip">Miete</div>
+  <div class="filter-chip">E-Commerce</div>
+  <div class="filter-chip">SaaS</div>
+  <div class="filter-chip">Blog</div>
+  <div class="filter-chip">App</div>
+  <div class="filter-chip">WPA</div>
+  <select class="sort-select"><option>Neueste zuerst</option><option>Preis ↑</option><option>Preis ↓</option><option>Umsatz ↑</option></select>
+</div>
+
+<!-- SECTION HEAD -->
+<div class="section-head">
+  <div><div class="section-title">Aktuelle Angebote</div><div class="section-sub">1.247 Angebote gefunden</div></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-outline" style="font-size:.75rem;"><i class="fa-solid fa-list"></i> Liste</button>
+    <button class="btn btn-outline" style="font-size:.75rem;border-color:var(--a1);color:var(--a1);"><i class="fa-solid fa-grip"></i> Kacheln</button>
+  </div>
+</div>
+
+<!-- LISTINGS GRID -->
+<div class="listings">
+
+  <!-- CARD 1 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>Flippa · ID #A1042</div>
+        <div class="card-title">Premium E-Commerce Shop – Fashion Nische</div>
+        <div class="card-badges">
+          <span class="badge badge-sell"><i class="fa-solid fa-tag"></i> Verkauf</span>
+          <span class="badge badge-hot"><i class="fa-solid fa-fire"></i> Hot</span>
+          <span class="badge badge-verified"><i class="fa-solid fa-circle-check"></i> Verifiziert</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(16,185,129,.15);color:var(--a3);">🛒</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">Etablierter Online-Shop mit 3 Jahren Traffic-History, 12.000 monatliche Besucher, SEO-optimiert, fertige Lieferkette inklusive.</div>
+      <div class="card-tech"><span class="tech-tag">React</span><span class="tech-tag">Next.js</span><span class="tech-tag">Shopify</span><span class="tech-tag">SEO:94</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MONATSUMSATZ</div><div class="meta-value" style="color:var(--a3)">€3.200</div></div>
+        <div class="meta-item"><div class="meta-label">TRAFFIC/Mo</div><div class="meta-value">12.400</div></div>
+        <div class="meta-item"><div class="meta-label">ALTER</div><div class="meta-value">3 Jahre</div></div>
+        <div class="meta-item"><div class="meta-label">DA</div><div class="meta-value">42</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Title-Tag: "Fashion Shop DE kaufen" (62 Z.)</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Schema.org Product markup vorhanden</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Core Web Vitals: LCP 1.2s / CLS 0.02</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Kaufvertrag &amp; NDA als <a>PDF downloaden</a> · <a>DOCX downloaden</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:var(--a3)">€12.500</div><div class="price-sub">Einmalzahlung · Verhandlungsbasis</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>Sedo · ID #B2089</div>
+        <div class="card-title">SaaS Dashboard – Projektmanagement Tool</div>
+        <div class="card-badges">
+          <span class="badge badge-rent"><i class="fa-solid fa-key"></i> Miete</span>
+          <span class="badge badge-new"><i class="fa-solid fa-star"></i> Neu</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(0,229,255,.12);color:var(--a1);">📊</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">Vollständiges SaaS-Dashboard mit 450 aktiven Nutzern, monatlich wiederkehrende Einnahmen, Vue.js Frontend, Laravel Backend.</div>
+      <div class="card-tech"><span class="tech-tag">Vue.js</span><span class="tech-tag">Laravel</span><span class="tech-tag">MySQL</span><span class="tech-tag">PWA</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MRR</div><div class="meta-value" style="color:var(--a1)">€1.800</div></div>
+        <div class="meta-item"><div class="meta-label">NUTZER</div><div class="meta-value">450</div></div>
+        <div class="meta-item"><div class="meta-label">CHURN</div><div class="meta-value">2,1%</div></div>
+        <div class="meta-item"><div class="meta-label">UPTIME</div><div class="meta-value">99.9%</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Strukturierte Daten: SoftwareApplication</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Sitemap.xml + robots.txt konfiguriert</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Mietvertrag als <a>PDF</a> · <a>DOCX</a> · Lizenzvereinbarung <a>PDF</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:var(--a1)">€450<span style="font-size:.75rem;font-weight:400">/Mo</span></div><div class="price-sub">12 Mon. Mindestlaufzeit</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>Empire Flippers · ID #C3401</div>
+        <div class="card-title">Authority Blog – Finanznische – 80K Traffic</div>
+        <div class="card-badges">
+          <span class="badge badge-sell"><i class="fa-solid fa-tag"></i> Verkauf</span>
+          <span class="badge badge-hot"><i class="fa-solid fa-fire"></i> Hot</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(245,158,11,.12);color:var(--a4);">📝</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">Authority Blog mit 80.000 monatlichen organischen Besuchern, 45 DR, AdSense + Affiliate-Einnahmen, vollständig Content-optimiert.</div>
+      <div class="card-tech"><span class="tech-tag">WordPress</span><span class="tech-tag">Elementor</span><span class="tech-tag">AdSense</span><span class="tech-tag">DR:45</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MONATSUMSATZ</div><div class="meta-value" style="color:var(--a4)">€2.100</div></div>
+        <div class="meta-item"><div class="meta-label">TRAFFIC/Mo</div><div class="meta-value">80.000</div></div>
+        <div class="meta-item"><div class="meta-label">ALTER</div><div class="meta-value">5 Jahre</div></div>
+        <div class="meta-item"><div class="meta-label">BACKLINKS</div><div class="meta-value">2.340</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> 320 indexierte Keywords Seite 1 Google</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Open Graph & Twitter Cards konfiguriert</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Asset-Übergabevertrag <a>PDF</a> · <a>DOCX</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:var(--a4)">€46.200</div><div class="price-sub">3× Jahresumsatz · Bewertungsbasis</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 4 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>MicroAcquire · ID #D0912</div>
+        <div class="card-title">React Native App – Fitness & Tracking</div>
+        <div class="card-badges">
+          <span class="badge badge-sell"><i class="fa-solid fa-tag"></i> Verkauf</span>
+          <span class="badge badge-new"><i class="fa-solid fa-star"></i> Neu</span>
+          <span class="badge badge-verified"><i class="fa-solid fa-circle-check"></i> Verifiziert</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(124,58,237,.15);color:#a78bfa;">📱</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">iOS & Android App mit 5.200 aktiven Nutzern, In-App-Käufe integriert, 4.6★ Rating im App Store, vollständiger Source-Code inklusive.</div>
+      <div class="card-tech"><span class="tech-tag">React Native</span><span class="tech-tag">Firebase</span><span class="tech-tag">Stripe</span><span class="tech-tag">iOS/Android</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MONATSUMSATZ</div><div class="meta-value" style="color:#a78bfa">€4.800</div></div>
+        <div class="meta-item"><div class="meta-label">AKTIVE NUTZER</div><div class="meta-value">5.200</div></div>
+        <div class="meta-item"><div class="meta-label">RATING</div><div class="meta-value">4.6★</div></div>
+        <div class="meta-item"><div class="meta-label">DOWNLOADS</div><div class="meta-value">28K</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> App Store Optimization (ASO) komplett</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Landingpage SEO Score: 91/100</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Quellcode-Lizenzvertrag <a>PDF</a> · NDA <a>PDF</a> · LOI <a>DOCX</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:#a78bfa">€96.000</div><div class="price-sub">20× MRR · Verhandlungsbasis</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 5 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>BizBuySell · ID #E2201</div>
+        <div class="card-title">WooCommerce Store – Elektronik & Gadgets</div>
+        <div class="card-badges">
+          <span class="badge badge-rent"><i class="fa-solid fa-key"></i> Miete</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(239,68,68,.12);color:var(--a5);">⚡</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">Vollständig betriebsbereiter WooCommerce Store, Dropshipping-Setup, 340 SKUs, Google Shopping integriert, automatisierte Prozesse.</div>
+      <div class="card-tech"><span class="tech-tag">WordPress</span><span class="tech-tag">WooCommerce</span><span class="tech-tag">PHP</span><span class="tech-tag">Google Ads</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MONATSUMSATZ</div><div class="meta-value" style="color:var(--a5)">€2.800</div></div>
+        <div class="meta-item"><div class="meta-label">SKUs</div><div class="meta-value">340</div></div>
+        <div class="meta-item"><div class="meta-label">CONV. RATE</div><div class="meta-value">3.2%</div></div>
+        <div class="meta-item"><div class="meta-label">TRAFFIC/Mo</div><div class="meta-value">18.000</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Yoast SEO Premium konfiguriert</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Google Merchant Center verknüpft</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Nutzungsvertrag <a>PDF</a> · SLA-Dokument <a>DOCX</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:var(--a5)">€380<span style="font-size:.75rem;font-weight:400">/Mo</span></div><div class="price-sub">6 Mon. Mindestlaufzeit</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 6 -->
+  <div class="listing-card">
+    <div class="card-header">
+      <div>
+        <div class="card-source"><span class="dot"></span>FE International · ID #F0077</div>
+        <div class="card-title">B2B Lead-Gen Plattform – DACH Region</div>
+        <div class="card-badges">
+          <span class="badge badge-sell"><i class="fa-solid fa-tag"></i> Verkauf</span>
+          <span class="badge badge-verified"><i class="fa-solid fa-circle-check"></i> Verifiziert</span>
+        </div>
+      </div>
+      <div class="card-type-icon" style="background:rgba(0,229,255,.12);color:var(--a1);">🎯</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">Spezialisierte B2B-Plattform für DACH-Unternehmen, 1.200 registrierte Firmen, CRM-Integration, automatisierter Newsletter (4.200 Abonnenten).</div>
+      <div class="card-tech"><span class="tech-tag">Angular</span><span class="tech-tag">Node.js</span><span class="tech-tag">PostgreSQL</span><span class="tech-tag">HubSpot</span></div>
+      <div class="card-meta">
+        <div class="meta-item"><div class="meta-label">MONATSUMSATZ</div><div class="meta-value" style="color:var(--a1)">€6.400</div></div>
+        <div class="meta-item"><div class="meta-label">B2B KUNDEN</div><div class="meta-value">1.200</div></div>
+        <div class="meta-item"><div class="meta-label">ALTER</div><div class="meta-value">4 Jahre</div></div>
+        <div class="meta-item"><div class="meta-label">EMAIL-LIST</div><div class="meta-value">4.200</div></div>
+      </div>
+    </div>
+    <div class="seo-meta-strip">
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Canonical-Tags & Hreflang DE/AT/CH</div>
+      <div class="seo-row"><i class="fa-solid fa-check"></i> Google Business Profile verifiziert</div>
+    </div>
+    <div class="contract-strip"><i class="fa-solid fa-file-pdf"></i> Unternehmenskaufvertrag <a>PDF</a> · Due-Diligence-Bericht <a>PDF</a></div>
+    <div class="card-footer">
+      <div><div class="price-main" style="color:var(--a1)">€192.000</div><div class="price-sub">2,5× Jahresumsatz</div></div>
+      <div class="card-actions">
+        <a href="unterseite1.html" class="card-btn card-btn-ghost">Details</a>
+        <button class="card-btn card-btn-primary">Kontakt</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+  <div class="page-btn">‹</div>
+  <div class="page-btn active">1</div>
+  <div class="page-btn">2</div>
+  <div class="page-btn">3</div>
+  <div class="page-btn">…</div>
+  <div class="page-btn">18</div>
+  <div class="page-btn">›</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-col">
+    <h4>SELINOVA-TECH</h4>
+    <a href="#">Über uns</a>
+    <a href="#">Wie es funktioniert</a>
+    <a href="#">Preise</a>
+    <a href="#">Blog</a>
+  </div>
+  <div class="foot-col">
+    <h4>Marktplatz</h4>
+    <a href="#">Webseiten kaufen</a>
+    <a href="#">Webseiten mieten</a>
+    <a href="#">Angebot einstellen</a>
+    <a href="#">Bewertungen</a>
+  </div>
+  <div class="foot-col">
+    <h4>Rechtliches</h4>
+    <a href="#">Kaufverträge (PDF)</a>
+    <a href="#">Mietverträge (PDF)</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">AGB</a>
+  </div>
+  <div class="foot-col">
+    <h4>Kontakt</h4>
+    <a href="mailto:support@selinova-tech.at">support@selinova-tech.at</a>
+    <a href="tel:+4312125867344">+43 1 212 58 67 344</a>
+    <a href="tel:+436769271361">+43 676 927 13 61</a>
+    <a href="#">Engerthstrasse, 1020 Wien</a>
+  </div>
+</footer>
+<div class="foot-bottom">© 2026 SELINOVA-TECH Medien Architektur E.U · Wien, Österreich · ALLE ANGEBOTE GEPRÜFT · GDPR KONFORM · IMPRESSUM</div>
+
+<script>
+document.querySelectorAll('.filter-chip').forEach(c=>{c.addEventListener('click',()=>{document.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');});});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+

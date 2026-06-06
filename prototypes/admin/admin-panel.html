@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Panel | SELINOVA-TECH Medien Architektur E.U</title>
+<meta name="description" content="Vollständiges Admin-Panel für SELINOVA-TECH Marktplatz – Verwaltung von Verkauf, Vermietung, Nutzern, SEO und Verträgen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ══════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════ */
+:root {
+  --bg-base:       #0a0b0f;
+  --bg-card:       #12141a;
+  --bg-surface:    #1a1d26;
+  --bg-hover:      #22263a;
+  --accent:        #00e5ff;
+  --accent2:       #7c3aed;
+  --green:         #10b981;
+  --orange:        #f59e0b;
+  --red:           #ef4444;
+  --t1:            #f0f2ff;
+  --t2:            #8892b0;
+  --t3:            #4a5568;
+  --border:        #1e2235;
+  --sidebar-w:     260px;
+  --topbar-h:      64px;
+  --mobile-nav-h:  64px;
+  --fh: 'Syne', sans-serif;
+  --fm: 'Space Mono', monospace;
+  --fb: 'DM Sans', sans-serif;
+  --radius: 12px;
+}
+
+/* ══════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--fb);
+  background: var(--bg-base);
+  color: var(--t1);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; }
+
+/* ══════════════════════════════════════
+   SIDEBAR — DESKTOP
+══════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar-logo {
+  padding: 22px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.logo-text { font-family: var(--fh); font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; }
+.logo-sub  { font-size: .6rem; color: var(--t2); font-family: var(--fm); }
+.sidebar-close {
+  display: none;
+  margin-left: auto;
+  background: none; border: none;
+  color: var(--t2); font-size: 1.1rem; padding: 4px;
+  cursor: pointer;
+}
+.sidebar-section {
+  padding: 16px 14px 4px;
+  font-size: .58rem; font-family: var(--fm);
+  color: var(--t3); text-transform: uppercase; letter-spacing: .12em;
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 14px; margin: 2px 8px;
+  border-radius: 8px;
+  color: var(--t2); font-size: .86rem;
+  position: relative; transition: .18s;
+  white-space: nowrap;
+}
+.nav-item:hover, .nav-item.active {
+  background: var(--bg-hover); color: var(--t1);
+}
+.nav-item.active::before {
+  content: ''; position: absolute;
+  left: -8px; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 18px;
+  background: var(--accent); border-radius: 2px;
+}
+.nav-item .nb {
+  margin-left: auto;
+  background: var(--red); color: #fff;
+  font-size: .58rem; padding: 2px 6px;
+  border-radius: 10px; font-family: var(--fm);
+}
+.nav-item .nb.g { background: var(--green); }
+.nav-item i { width: 16px; text-align: center; font-size: .88rem; flex-shrink: 0; }
+.sidebar-footer {
+  margin-top: auto; padding: 14px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.user-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px; background: var(--bg-surface); border-radius: 10px;
+}
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 700; flex-shrink: 0;
+}
+.user-name  { font-size: .8rem; font-weight: 600; }
+.user-role  { font-size: .6rem; color: var(--t2); font-family: var(--fm); }
+
+/* Overlay (mobile) */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.open { display: block; }
+
+/* ══════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════ */
+.topbar {
+  position: fixed;
+  top: 0; left: var(--sidebar-w); right: 0;
+  height: var(--topbar-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 12px;
+  z-index: 190;
+}
+.topbar-burger {
+  display: none;
+  background: none; border: none;
+  color: var(--t1); font-size: 1.15rem;
+  padding: 6px; margin-right: 2px;
+  border-radius: 6px;
+}
+.topbar-info { flex: 1; min-width: 0; }
+.topbar-title {
+  font-family: var(--fh); font-weight: 700; font-size: 1rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-path { font-size: .68rem; color: var(--t3); font-family: var(--fm); }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.search-bar {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 12px;
+  width: 220px;
+}
+.search-bar input {
+  background: none; border: none; outline: none;
+  color: var(--t1); font-size: .82rem;
+  font-family: var(--fb); width: 100%;
+}
+.search-bar input::placeholder { color: var(--t3); }
+.icon-btn {
+  width: 34px; height: 34px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t2); transition: .18s; position: relative;
+  flex-shrink: 0;
+}
+.icon-btn:hover { color: var(--t1); border-color: var(--accent); }
+.icon-btn .dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 7px; height: 7px;
+  background: var(--red); border-radius: 50%;
+  border: 2px solid var(--bg-card);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  font-size: .8rem; font-family: var(--fb);
+  font-weight: 500; border: none; transition: .18s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { opacity: .85; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--t2);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--t1); }
+
+/* ══════════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════════ */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  padding: 24px;
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+/* ══════════════════════════════════════
+   ALERT BAR
+══════════════════════════════════════ */
+.alert-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 10px;
+  margin-bottom: 20px; font-size: .8rem;
+  flex-wrap: wrap;
+}
+.alert-bar.warning {
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.3);
+  color: var(--orange);
+}
+
+/* ══════════════════════════════════════
+   KPI GRID
+══════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px; position: relative;
+  overflow: hidden; transition: .2s;
+}
+.kpi-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: var(--kpi-color);
+}
+.kpi-card:hover { border-color: var(--kpi-color); transform: translateY(-2px); }
+.kpi-label {
+  font-size: .68rem; color: var(--t2);
+  font-family: var(--fm); text-transform: uppercase; letter-spacing: .07em;
+}
+.kpi-value {
+  font-family: var(--fh); font-size: 1.7rem;
+  font-weight: 800; margin: 5px 0 4px; line-height: 1;
+}
+.kpi-sub { font-size: .72rem; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.kpi-change { font-family: var(--fm); font-size: .65rem; padding: 2px 6px; border-radius: 4px; }
+.kpi-change.up   { background: rgba(16,185,129,.15); color: var(--green); }
+.kpi-change.down { background: rgba(239,68,68,.15);  color: var(--red); }
+.kpi-icon { position: absolute; top: 14px; right: 14px; font-size: 1.3rem; opacity: .15; }
+
+/* ══════════════════════════════════════
+   CONTENT GRIDS
+══════════════════════════════════════ */
+.content-grid  { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-bottom: 18px; }
+.content-grid2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 18px; }
+
+/* ══════════════════════════════════════
+   PANEL
+══════════════════════════════════════ */
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.panel-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px; gap: 8px;
+  flex-wrap: wrap;
+}
+.panel-title { font-family: var(--fh); font-size: .92rem; font-weight: 700; }
+.panel-action { font-size: .72rem; color: var(--accent); cursor: pointer; font-family: var(--fm); white-space: nowrap; }
+
+/* ══════════════════════════════════════
+   DATA TABLE — desktop
+══════════════════════════════════════ */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.data-table th {
+  font-size: .62rem; font-family: var(--fm);
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--t3); padding: 8px 10px;
+  border-bottom: 1px solid var(--border); text-align: left;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid rgba(30,34,53,.5);
+  font-size: .8rem; vertical-align: middle;
+}
+.data-table tr:hover td { background: var(--bg-hover); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* MOBILE CARD TABLE */
+.mobile-cards { display: none; }
+.mc-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px; margin-bottom: 10px;
+}
+.mc-card:last-child { margin-bottom: 0; }
+.mc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.mc-title { font-size: .84rem; font-weight: 600; line-height: 1.3; }
+.mc-tech  { font-size: .62rem; color: var(--t3); margin-top: 2px; }
+.mc-row   { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.mc-price { font-family: var(--fm); font-size: .82rem; font-weight: 700; }
+.mc-source{ font-size: .62rem; color: var(--t3); font-family: var(--fm); }
+.mc-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+/* STATUS BADGE */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 20px;
+  font-size: .62rem; font-family: var(--fm);
+}
+.status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.status-badge.live    { background: rgba(16,185,129,.15); color: var(--green); }
+.status-badge.pending { background: rgba(245,158,11,.15); color: var(--orange); }
+.status-badge.review  { background: rgba(0,229,255,.15);  color: var(--accent); }
+.status-badge.sold    { background: rgba(124,58,237,.15); color: #a78bfa; }
+
+/* TABS */
+.tabs { display: flex; gap: 3px; padding: 4px; background: var(--bg-surface); border-radius: 9px; margin-bottom: 14px; overflow-x: auto; }
+.tab {
+  padding: 7px 14px; border-radius: 6px;
+  font-size: .74rem; cursor: pointer;
+  color: var(--t2); font-family: var(--fm);
+  transition: .18s; white-space: nowrap; flex-shrink: 0;
+}
+.tab.active { background: var(--bg-card); color: var(--t1); }
+
+/* CHART */
+.chart-bar { display: flex; align-items: flex-end; gap: 7px; height: 100px; padding: 0 2px; }
+.bar-col   { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+.bar-fill  {
+  width: 100%; border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  transition: .3s; min-height: 4px;
+}
+.bar-label { font-size: .58rem; font-family: var(--fm); color: var(--t3); }
+
+/* SEO */
+.seo-score { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface); border-radius: 9px; margin-bottom: 9px; }
+.seo-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: conic-gradient(var(--green) var(--pct), var(--border) 0);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fm); font-size: .72rem; font-weight: 700;
+  position: relative; flex-shrink: 0;
+}
+.seo-ring::before {
+  content: ''; position: absolute;
+  width: 38px; height: 38px;
+  background: var(--bg-surface); border-radius: 50%;
+}
+.seo-ring span { position: relative; z-index: 1; }
+.seo-info  { flex: 1; min-width: 0; }
+.seo-name  { font-size: .8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seo-url   { font-size: .62rem; color: var(--t3); font-family: var(--fm); }
+.seo-meta  { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+.seo-tag   { font-size: .58rem; padding: 2px 6px; border-radius: 4px; background: var(--bg-hover); color: var(--t2); font-family: var(--fm); }
+
+/* ACTIVITY */
+.activity-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(30,34,53,.5); }
+.activity-item:last-child { border-bottom: none; }
+.activity-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.activity-text { font-size: .78rem; line-height: 1.5; }
+.activity-time { font-size: .62rem; color: var(--t3); font-family: var(--fm); margin-top: 2px; }
+
+/* QUICK ACTIONS */
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quick-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 7px; padding: 14px 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 9px; cursor: pointer;
+  transition: .18s; color: var(--t2);
+}
+.quick-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.quick-btn i    { font-size: 1.2rem; }
+.quick-btn span { font-size: .65rem; font-family: var(--fm); text-align: center; }
+
+/* PROGRESS */
+.progress-bar  { height: 5px; background: var(--bg-hover); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* BOTTOM NAV (mobile) */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--mobile-nav-h);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  z-index: 300;
+  justify-content: space-around; align-items: center;
+  padding: 0 4px;
+}
+.mn-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 10px; border-radius: 8px;
+  color: var(--t3); font-size: .58rem;
+  font-family: var(--fm); cursor: pointer;
+  transition: .18s; min-width: 48px; text-align: center;
+  position: relative;
+}
+.mn-item i { font-size: 1.1rem; }
+.mn-item.active { color: var(--accent); }
+.mn-item .mn-dot {
+  position: absolute; top: 4px; right: 8px;
+  width: 6px; height: 6px;
+  background: var(--red); border-radius: 50%;
+  border: 2px solid var(--bg-card);
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — TABLET (≤1100px)
+══════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+  .content-grid  { grid-template-columns: 1fr; }
+  .content-grid2 { grid-template-columns: 1fr 1fr; }
+  .search-bar  { width: 180px; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE (≤768px)
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Sidebar slides out */
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+    width: 280px;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,.6);
+  }
+  .sidebar-close { display: block; }
+
+  /* Topbar full width */
+  .topbar {
+    left: 0;
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .topbar-burger { display: flex; align-items: center; justify-content: center; }
+  .search-bar    { display: none; }
+
+  /* Main fills screen, add bottom nav padding */
+  .main {
+    margin-left: 0;
+    margin-top: var(--topbar-h);
+    padding: 14px 12px calc(var(--mobile-nav-h) + 14px);
+  }
+
+  /* KPI 2-col */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi-value { font-size: 1.35rem; }
+  .kpi-card  { padding: 14px; }
+
+  /* All grids → 1 col */
+  .content-grid  { grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+  .content-grid2 { grid-template-columns: 1fr; gap: 12px; }
+
+  /* Table → card list */
+  .table-wrap { display: none; }
+  .mobile-cards { display: block; }
+
+  /* Tabs scrollable */
+  .tabs { gap: 2px; }
+  .tab  { padding: 6px 11px; font-size: .7rem; }
+
+  /* Bottom nav */
+  .mobile-nav { display: flex; }
+
+  /* Alert */
+  .alert-bar { font-size: .76rem; padding: 10px 12px; }
+
+  /* Panel */
+  .panel { padding: 14px; }
+  .panel-header { margin-bottom: 12px; }
+
+  /* Chart smaller */
+  .chart-bar { height: 80px; gap: 5px; }
+  .bar-label { font-size: .55rem; }
+
+  /* Quick grid 3-col on mobile */
+  .quick-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .quick-btn  { padding: 12px 6px; gap: 5px; }
+  .quick-btn i   { font-size: 1.05rem; }
+  .quick-btn span{ font-size: .58rem; }
+
+  /* SEO ring smaller */
+  .seo-ring { width: 44px; height: 44px; }
+  .seo-ring::before { width: 32px; height: 32px; }
+
+  /* Sidebar footer user card smaller padding */
+  .sidebar-footer { padding: 12px; }
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — SMALL (≤400px)
+══════════════════════════════════════ */
+@media (max-width: 400px) {
+  .kpi-grid  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-value { font-size: 1.2rem; }
+  .quick-grid{ grid-template-columns: repeat(2, 1fr); }
+  .main      { padding: 10px 10px calc(var(--mobile-nav-h) + 10px); }
+}
+</style>
+</head>
+<body>
+<script>
+  // Client-side admin protection for static prototype
+  if (localStorage.getItem('nexus_admin_auth') !== 'true') {
+    window.location.replace('admin-login.html');
+  }
+</script>
+
+<!-- ══ SIDEBAR OVERLAY ══ -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="../../designs/selinova-gate-logo.png" alt="SELINOVA-TECH" style="height: 42px; width: auto; margin-right: 8px; vertical-align: middle;" />
+    <div>
+      <div class="logo-sub">ADMIN PANEL v3.2</div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="sidebar-section">ZUGANGSRECHTE (DEMO)</div>
+  <div style="padding:0 14px 12px;font-size:11px;line-height:1.3;color:var(--t2);">
+    <strong>Superadmin</strong> (Zugangsdaten verschlüsselt): volles CRUD, Löschen, Reset<br>
+    <strong>Moderator</strong> (Zugangsdaten verschlüsselt): Anfragen &amp; Verträge verwalten<br>
+    <strong>Viewer</strong> (Zugangsdaten verschlüsselt): nur Lesen
+  </div>
+
+  <div class="sidebar-section">Dashboard</div>
+  <a href="#" class="nav-item active" onclick="navClick(this,event)"><i class="fa-solid fa-gauge-high"></i> Übersicht</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-chart-line"></i> Analysen <span class="nb g">NEU</span></a>
+
+  <div class="sidebar-section">Marktplatz</div>
+  <a href="../../designs/mainboard.html" class="nav-item"><i class="fa-solid fa-store"></i> Mainboard</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-tag"></i> Verkaufsangebote <span class="nb">12</span></a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-key"></i> Mietangebote <span class="nb">7</span></a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-handshake"></i> Anfragen</a>
+
+  <div class="sidebar-section">Webseiten</div>
+  <a href="../../designs/unterseite1.html" class="nav-item"><i class="fa-solid fa-globe"></i> Unterseiten</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-code"></i> HTML-Templates</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-file-contract"></i> Verträge &amp; Docs</a>
+
+  <div class="sidebar-section">System</div>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-users"></i> Nutzer &amp; Rollen</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-magnifying-glass-chart"></i> SEO Manager</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-shield-halved"></i> Sicherheit</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-envelope"></i> E-Mail System <span class="nb">3</span></a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-gear"></i> Einstellungen</a>
+  <a href="#" class="nav-item" onclick="navClick(this,event)"><i class="fa-solid fa-circle-question"></i> Support</a>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">AD</div>
+      <div>
+        <div class="user-name">Admin User</div>
+        <div class="user-role">SUPER ADMIN</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;font-size:.65rem;color:var(--t3);"></i>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     TOPBAR
+══════════════════════════════════════ -->
+<header class="topbar">
+  <button class="topbar-burger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+  <div class="topbar-info">
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-path">admin / übersicht</div>
+  </div>
+  <div class="topbar-actions">
+    <div class="search-bar">
+      <i class="fa-solid fa-search" style="color:var(--t3);font-size:.75rem;"></i>
+      <input placeholder="Suche…">
+    </div>
+    <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="dot"></span></div>
+    <div class="icon-btn"><i class="fa-solid fa-envelope"></i></div>
+    <button onclick="logoutAdmin()" class="icon-btn" title="Abmelden" style="color:#ef4444;">
+      <i class="fa-solid fa-sign-out-alt"></i>
+    </button>
+    <button class="btn btn-primary" style="padding:8px 14px;">
+      <i class="fa-solid fa-plus"></i>
+      <span style="display:none;" class="btn-label-lg">Neu</span>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN
+══════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ALERT -->
+  <div class="alert-bar warning">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <strong>5 Angebote</strong> warten auf Freigabe – bitte prüfen.
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--kpi-color:var(--accent)">
+      <i class="fa-solid fa-euro-sign kpi-icon"></i>
+      <div class="kpi-label">Gesamtumsatz</div>
+      <div class="kpi-value" style="color:var(--accent)">€184.320</div>
+      <div class="kpi-sub">
+        <span class="kpi-change up">▲ +12,4%</span>
+        <span style="color:var(--t3)">Vormonat</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="--kpi-color:var(--green)">
+      <i class="fa-solid fa-store kpi-icon"></i>
+      <div class="kpi-label">Aktive Angebote</div>
+      <div class="kpi-value" style="color:var(--green)">1.247</div>
+      <div class="kpi-sub">
+        <span class="kpi-change up">▲ +34</span>
+        <span style="color:var(--t3)">diese Woche</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="--kpi-color:var(--orange)">
+      <i class="fa-solid fa-users kpi-icon"></i>
+      <div class="kpi-label">Nutzer</div>
+      <div class="kpi-value" style="color:var(--orange)">8.914</div>
+      <div class="kpi-sub">
+        <span class="kpi-change up">▲ +127</span>
+        <span style="color:var(--t3)">heute</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="--kpi-color:var(--accent2)">
+      <i class="fa-solid fa-file-contract kpi-icon"></i>
+      <div class="kpi-label">Verträge</div>
+      <div class="kpi-value" style="color:#a78bfa">342</div>
+      <div class="kpi-sub">
+        <span class="kpi-change down">▼ -2</span>
+        <span style="color:var(--t3)">offen</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: TABLE + SIDEBAR -->
+  <div class="content-grid">
+
+    <!-- ANGEBOTE PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Aktuelle Angebote</div>
+        <div style="display:flex;gap:7px;align-items:center;">
+          <button class="btn btn-ghost" style="font-size:.68rem;padding:5px 10px;">CSV</button>
+          <span class="panel-action">Alle →</span>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active">Alle</div>
+        <div class="tab">Verkauf</div>
+        <div class="tab">Miete</div>
+        <div class="tab">Pending</div>
+      </div>
+
+      <!-- DESKTOP TABLE -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Angebot</th><th>Quelle</th><th>Preis</th>
+              <th>Typ</th><th>Status</th><th>Aktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>E-Commerce Shop #A1</strong><br><span style="font-size:.62rem;color:var(--t3)">React / Next.js</span></td>
+              <td><span style="font-family:var(--fm);font-size:.68rem;">flippa.com</span></td>
+              <td style="font-family:var(--fm);color:var(--green)">€12.500</td>
+              <td><span class="status-badge live">Verkauf</span></td>
+              <td><span class="status-badge live">Live</span></td>
+              <td><button class="btn btn-ghost" style="font-size:.62rem;padding:4px 9px;">Bearbeiten</button></td>
+            </tr>
+            <tr>
+              <td><strong>SaaS Dashboard B4</strong><br><span style="font-size:.62rem;color:var(--t3)">Vue / Laravel</span></td>
+              <td><span style="font-family:var(--fm);font-size:.68rem;">sedo.com</span></td>
+              <td style="font-family:var(--fm);color:var(--accent)">€450/Mo</td>
+              <td><span class="status-badge review">Miete</span></td>
+              <td><span class="status-badge pending">Pending</span></td>
+              <td><button class="btn btn-ghost" style="font-size:.62rem;padding:4px 9px;">Prüfen</button></td>
+            </tr>
+            <tr>
+              <td><strong>Blog Netzwerk C7</strong><br><span style="font-size:.62rem;color:var(--t3)">WordPress</span></td>
+              <td><span style="font-family:var(--fm);font-size:.68rem;">empire-flippers</span></td>
+              <td style="font-family:var(--fm);color:var(--green)">€8.200</td>
+              <td><span class="status-badge live">Verkauf</span></td>
+              <td><span class="status-badge live">Live</span></td>
+              <td><button class="btn btn-ghost" style="font-size:.62rem;padding:4px 9px;">Bearbeiten</button></td>
+            </tr>
+            <tr>
+              <td><strong>WooCommerce D2</strong><br><span style="font-size:.62rem;color:var(--t3)">PHP / WooCommerce</span></td>
+              <td><span style="font-family:var(--fm);font-size:.68rem;">bizbuysell.com</span></td>
+              <td style="font-family:var(--fm);color:var(--accent)">€300/Mo</td>
+              <td><span class="status-badge review">Miete</span></td>
+              <td><span class="status-badge review">Review</span></td>
+              <td><button class="btn btn-ghost" style="font-size:.62rem;padding:4px 9px;">Prüfen</button></td>
+            </tr>
+            <tr>
+              <td><strong>Mobile App E9</strong><br><span style="font-size:.62rem;color:var(--t3)">React Native</span></td>
+              <td><span style="font-family:var(--fm);font-size:.68rem;">microacquire</span></td>
+              <td style="font-family:var(--fm);color:#a78bfa">€34.000</td>
+              <td><span class="status-badge live">Verkauf</span></td>
+              <td><span class="status-badge sold">Sold</span></td>
+              <td><button class="btn btn-ghost" style="font-size:.62rem;padding:4px 9px;">Archiv</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARDS (shown on mobile instead of table) -->
+      <div class="mobile-cards">
+        <div class="mc-card">
+          <div class="mc-top">
+            <div>
+              <div class="mc-title">E-Commerce Shop #A1</div>
+              <div class="mc-tech">React / Next.js · flippa.com</div>
+            </div>
+            <span class="status-badge live">Live</span>
+          </div>
+          <div class="mc-row">
+            <span class="mc-price" style="color:var(--green)">€12.500</span>
+            <span class="status-badge live">Verkauf</span>
+          </div>
+          <div class="mc-actions">
+            <button class="btn btn-ghost" style="font-size:.72rem;padding:6px 12px;flex:1;">Bearbeiten</button>
+            <button class="btn btn-primary" style="font-size:.72rem;padding:6px 12px;">Details</button>
+          </div>
+        </div>
+        <div class="mc-card">
+          <div class="mc-top">
+            <div>
+              <div class="mc-title">SaaS Dashboard B4</div>
+              <div class="mc-tech">Vue / Laravel · sedo.com</div>
+            </div>
+            <span class="status-badge pending">Pending</span>
+          </div>
+          <div class="mc-row">
+            <span class="mc-price" style="color:var(--accent)">€450/Mo</span>
+            <span class="status-badge review">Miete</span>
+          </div>
+          <div class="mc-actions">
+            <button class="btn btn-ghost" style="font-size:.72rem;padding:6px 12px;flex:1;">Prüfen</button>
+            <button class="btn btn-primary" style="font-size:.72rem;padding:6px 12px;">Details</button>
+          </div>
+        </div>
+        <div class="mc-card">
+          <div class="mc-top">
+            <div>
+              <div class="mc-title">Blog Netzwerk C7</div>
+              <div class="mc-tech">WordPress · empire-flippers</div>
+            </div>
+            <span class="status-badge live">Live</span>
+          </div>
+          <div class="mc-row">
+            <span class="mc-price" style="color:var(--green)">€8.200</span>
+            <span class="status-badge live">Verkauf</span>
+          </div>
+          <div class="mc-actions">
+            <button class="btn btn-ghost" style="font-size:.72rem;padding:6px 12px;flex:1;">Bearbeiten</button>
+            <button class="btn btn-primary" style="font-size:.72rem;padding:6px 12px;">Details</button>
+          </div>
+        </div>
+        <div class="mc-card">
+          <div class="mc-top">
+            <div>
+              <div class="mc-title">WooCommerce D2</div>
+              <div class="mc-tech">PHP · bizbuysell.com</div>
+            </div>
+            <span class="status-badge review">Review</span>
+          </div>
+          <div class="mc-row">
+            <span class="mc-price" style="color:var(--accent)">€300/Mo</span>
+            <span class="status-badge review">Miete</span>
+          </div>
+          <div class="mc-actions">
+            <button class="btn btn-ghost" style="font-size:.72rem;padding:6px 12px;flex:1;">Prüfen</button>
+            <button class="btn btn-primary" style="font-size:.72rem;padding:6px 12px;">Details</button>
+          </div>
+        </div>
+        <div class="mc-card">
+          <div class="mc-top">
+            <div>
+              <div class="mc-title">Mobile App E9</div>
+              <div class="mc-tech">React Native · microacquire</div>
+            </div>
+            <span class="status-badge sold">Sold</span>
+          </div>
+          <div class="mc-row">
+            <span class="mc-price" style="color:#a78bfa">€34.000</span>
+            <span class="status-badge live">Verkauf</span>
+          </div>
+          <div class="mc-actions">
+            <button class="btn btn-ghost" style="font-size:.72rem;padding:6px 12px;flex:1;">Archiv</button>
+            <button class="btn btn-primary" style="font-size:.72rem;padding:6px 12px;">Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS + ACTIVITY -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Schnellaktionen</div></div>
+        <div class="quick-grid">
+          <a href="../../designs/mainboard.html" class="quick-btn"><i class="fa-solid fa-store"></i><span>Mainboard</span></a>
+          <a href="../../designs/unterseite1.html" class="quick-btn"><i class="fa-solid fa-globe"></i><span>Unterseiten</span></a>
+          <div class="quick-btn"><i class="fa-solid fa-file-circle-plus"></i><span>Vertrag</span></div>
+          <div class="quick-btn"><i class="fa-solid fa-magnifying-glass-chart"></i><span>SEO-Check</span></div>
+          <div class="quick-btn"><i class="fa-solid fa-envelope-open-text"></i><span>E-Mail</span></div>
+          <div class="quick-btn"><i class="fa-solid fa-user-plus"></i><span>Nutzer</span></div>
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1;">
+        <div class="panel-header">
+          <div class="panel-title">Aktivitätslog</div>
+          <span class="panel-action">Live ●</span>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="activity-text"><strong>Neues Angebot</strong> „React SaaS #F11" eingegangen</div>
+            <div class="activity-time">vor 3 Min</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--orange)"></div>
+          <div>
+            <div class="activity-text"><strong>Nutzer max.m</strong> lud Vertrag #342 herunter</div>
+            <div class="activity-time">vor 8 Min</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--accent)"></div>
+          <div>
+            <div class="activity-text">SEO-Score <strong>unterseite-05</strong> aktualisiert (94/100)</div>
+            <div class="activity-time">vor 15 Min</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--accent2)"></div>
+          <div>
+            <div class="activity-text"><strong>Zahlung</strong> €12.500 für Angebot #A1 bestätigt</div>
+            <div class="activity-time">vor 22 Min</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--red)"></div>
+          <div>
+            <div class="activity-text"><strong>Angebot #G3</strong> abgelehnt – fehlende Unterlagen</div>
+            <div class="activity-time">vor 41 Min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: SEO + CHART + NUTZER -->
+  <div class="content-grid2">
+
+    <!-- SEO -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">SEO Monitor</div>
+        <span class="panel-action">Search Console →</span>
+      </div>
+      <div class="seo-score" style="--pct:92%">
+        <div class="seo-ring"><span>92</span></div>
+        <div class="seo-info">
+          <div class="seo-name">mainboard.html</div>
+          <div class="seo-url">/mainboard</div>
+          <div class="seo-meta">
+            <span class="seo-tag">Title ✓</span>
+            <span class="seo-tag">Meta ✓</span>
+            <span class="seo-tag">Schema ✓</span>
+          </div>
+        </div>
+      </div>
+      <div class="seo-score" style="--pct:78%">
+        <div class="seo-ring" style="background:conic-gradient(var(--orange) 78%,var(--border) 0)"><span>78</span></div>
+        <div class="seo-info">
+          <div class="seo-name">unterseite-03.html</div>
+          <div class="seo-url">/angebote/saas</div>
+          <div class="seo-meta">
+            <span class="seo-tag">Title ✓</span>
+            <span class="seo-tag" style="color:var(--red)">Backlinks ✗</span>
+          </div>
+        </div>
+      </div>
+      <div class="seo-score" style="--pct:94%">
+        <div class="seo-ring"><span>94</span></div>
+        <div class="seo-info">
+          <div class="seo-name">unterseite-07.html</div>
+          <div class="seo-url">/angebote/ecommerce</div>
+          <div class="seo-meta">
+            <span class="seo-tag">Title ✓</span>
+            <span class="seo-tag">Meta ✓</span>
+            <span class="seo-tag">LD+JSON ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Umsatz (7 Tage)</div></div>
+      <div class="chart-bar">
+        <div class="bar-col"><div class="bar-fill" style="height:55%"></div><div class="bar-label">Mo</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:70%"></div><div class="bar-label">Di</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:45%"></div><div class="bar-label">Mi</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:85%"></div><div class="bar-label">Do</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:60%"></div><div class="bar-label">Fr</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:95%"></div><div class="bar-label">Sa</div></div>
+        <div class="bar-col"><div class="bar-fill" style="height:78%"></div><div class="bar-label">So</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;">
+        <div>
+          <div style="font-size:.6rem;color:var(--t3);font-family:var(--fm);">Höchst</div>
+          <div style="font-family:var(--fh);font-size:1rem;color:var(--accent);">€28.400</div>
+        </div>
+        <div>
+          <div style="font-size:.6rem;color:var(--t3);font-family:var(--fm);">Ø Täglich</div>
+          <div style="font-family:var(--fh);font-size:1rem;">€18.200</div>
+        </div>
+        <div>
+          <div style="font-size:.6rem;color:var(--t3);font-family:var(--fm);">Gesamt</div>
+          <div style="font-family:var(--fh);font-size:1rem;color:var(--green);">€127.400</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUTZER & ROLLEN -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Nutzer &amp; Rollen</div>
+        <span class="panel-action">Verwalten →</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:.78rem;width:90px;flex-shrink:0;">Super Admin</span>
+          <div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:100%"></div></div>
+          <span style="font-family:var(--fm);font-size:.68rem;width:22px;text-align:right;">1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:.78rem;width:90px;flex-shrink:0;">Moderator</span>
+          <div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:30%"></div></div>
+          <span style="font-family:var(--fm);font-size:.68rem;width:22px;text-align:right;">6</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:.78rem;width:90px;flex-shrink:0;">Verkäufer</span>
+          <div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:60%"></div></div>
+          <span style="font-family:var(--fm);font-size:.68rem;width:22px;text-align:right;">247</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:.78rem;width:90px;flex-shrink:0;">Käufer</span>
+          <div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:95%"></div></div>
+          <span style="font-family:var(--fm);font-size:.68rem;width:38px;text-align:right;">8.660</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;"><i class="fa-solid fa-user-plus"></i> Einladen</button>
+        <button class="btn btn-ghost"><i class="fa-solid fa-shield"></i></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align:center;padding:14px;color:var(--t3);font-size:.6rem;font-family:var(--fm);">
+    SELINOVA-TECH ADMIN v3.2 — GDPR COMPLIANT — © 2026
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     MOBILE BOTTOM NAV
+══════════════════════════════════════ -->
+<nav class="mobile-nav">
+  <div class="mn-item active" onclick="mnClick(this)">
+    <i class="fa-solid fa-gauge-high"></i>
+    <span>Dashboard</span>
+  </div>
+  <div class="mn-item" onclick="mnClick(this)">
+    <i class="fa-solid fa-store"></i>
+    <span>Markt</span>
+    <span class="mn-dot"></span>
+  </div>
+  <div class="mn-item" onclick="mnClick(this)">
+    <i class="fa-solid fa-plus" style="background:var(--accent);color:#000;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:0;font-size:.9rem;"></i>
+    <span>Neu</span>
+  </div>
+  <div class="mn-item" onclick="mnClick(this)">
+    <i class="fa-solid fa-bell"></i>
+    <span>Alerts</span>
+    <span class="mn-dot"></span>
+  </div>
+  <div class="mn-item" onclick="openSidebar()">
+    <i class="fa-solid fa-bars"></i>
+    <span>Menü</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+// Sidebar open/close
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+// Close sidebar on resize to desktop
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>768) closeSidebar();
+});
+
+// Nav item click
+function navClick(el, e){
+  if(!el.href||el.getAttribute('href')==='#'){e.preventDefault();}
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  if(window.innerWidth<=768) closeSidebar();
+}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    t.closest('.tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+// Mobile nav click
+function mnClick(el){
+  document.querySelectorAll('.mn-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Admin logout
+function logoutAdmin() {
+  if (confirm('Admin-Bereich wirklich verlassen?')) {
+    localStorage.removeItem('nexus_admin_auth');
+    window.location.href = '../../designs/index.html';
+  }
+}
+</script>
+</body>
+</html>
+
+
+
+
+
+
+

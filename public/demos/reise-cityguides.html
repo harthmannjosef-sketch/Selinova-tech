@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityGuides Europa – Reise-Portal (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .city-card { transition: transform .2s, border-color .2s; }
+    .city-card:hover { transform: translateY(-2px); border-color: #10b981; }
+    .nav-active { color: #10b981; border-bottom: 2px solid #10b981; }
+    .metric { font-family: ui-monospace, monospace; }
+    .modal { animation: pop .2s ease; }
+    @keyframes pop { from { transform: scale(0.96); opacity:0; } to { transform:scale(1); opacity:1; } }
+    .guide-tag { font-size: 10px; padding: 1px 7px; border-radius: 999px; background: rgba(16,185,129,.1); color: #10b981; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <!-- Top Nav -->
+  <nav class="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-black font-bold">✈︎</div>
+        <div>
+          <div class="font-semibold text-xl tracking-tight">CityGuides Europa</div>
+          <div class="text-[10px] text-emerald-400 -mt-1">28 Städte • 55k MAU</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-sm">
+        <button onclick="showCities()" class="px-4 py-1.5 hover:bg-zinc-800 rounded-lg flex items-center gap-2" id="nav-cities"><i class="fa-solid fa-list"></i> <span>Städte</span></button>
+        <button onclick="showMap()" class="px-4 py-1.5 hover:bg-zinc-800 rounded-lg flex items-center gap-2" id="nav-map"><i class="fa-solid fa-map"></i> <span>Karte</span></button>
+        <button onclick="showBookings()" class="px-4 py-1.5 hover:bg-zinc-800 rounded-lg flex items-center gap-2" id="nav-bookings"><i class="fa-solid fa-calendar-check"></i> <span>Buchungen <span id="booking-count" class="text-emerald-400">(0)</span></span></button>
+        <button onclick="showAdmin()" class="ml-2 px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-medium rounded-lg flex items-center gap-2"><i class="fa-solid fa-cog"></i> <span>Admin</span></button>
+      </div>
+      <div class="text-xs px-3 py-1 bg-zinc-900 border border-zinc-700 rounded">Demo • Voll funktional + Sovereignty</div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Hero / Metrics -->
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="uppercase tracking-[2px] text-xs text-emerald-400 mb-1">EUROPA • 40+ GUIDES</div>
+        <h1 class="text-4xl font-semibold tracking-tighter">Entdecke Europa mit professionellen City Guides</h1>
+        <p class="text-zinc-400 mt-1">Interaktive Guides • Booking.com Partnerschaft • 38k Buchungen YTD • AdSense + Affiliate</p>
+      </div>
+      <div class="flex gap-3 text-sm">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-center">
+          <div class="text-emerald-400 text-2xl font-semibold metric">55.2k</div>
+          <div class="text-[10px] text-zinc-500">VISITORS / MO</div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-center">
+          <div class="text-emerald-400 text-2xl font-semibold metric" id="live-bookings">1.842</div>
+          <div class="text-[10px] text-zinc-500">BOOKINGS YTD</div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3 text-center">
+          <div class="text-emerald-400 text-2xl font-semibold metric">€1.950</div>
+          <div class="text-[10px] text-zinc-500">MRR (ADS + CPA)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="mb-6 flex flex-wrap gap-3 items-center">
+      <div class="flex-1 min-w-[260px]">
+        <input id="search" type="text" placeholder="Suche Stadt, Land oder Guide..." oninput="filterCities()" 
+               class="w-full bg-zinc-900 border border-zinc-700 focus:border-emerald-500 rounded-2xl px-4 py-3 text-sm outline-none">
+      </div>
+      <select id="country-filter" onchange="filterCities()" class="bg-zinc-900 border border-zinc-700 rounded-2xl px-4 py-3 text-sm">
+        <option value="">Alle Länder</option>
+        <option value="Deutschland">Deutschland</option>
+        <option value="Frankreich">Frankreich</option>
+        <option value="Italien">Italien</option>
+        <option value="Spanien">Spanien</option>
+        <option value="Portugal">Portugal</option>
+        <option value="Niederlande">Niederlande</option>
+        <option value="Österreich">Österreich</option>
+      </select>
+      <select id="sort" onchange="filterCities()" class="bg-zinc-900 border border-zinc-700 rounded-2xl px-4 py-3 text-sm">
+        <option value="bookings">Sort: Buchungen</option>
+        <option value="guides">Sort: Guides</option>
+        <option value="name">Sort: Name A-Z</option>
+      </select>
+      <button onclick="resetFilters()" class="px-4 py-3 text-sm border border-zinc-700 rounded-2xl hover:bg-zinc-900">Reset</button>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="min-h-[520px]"></div>
+
+    <!-- Trust / Partners -->
+    <div class="mt-12 pt-8 border-t border-zinc-800 text-xs text-zinc-500 flex flex-wrap gap-x-8 gap-y-1">
+      <div>✓ Booking.com Partner • Provision 12-18%</div>
+      <div>✓ 92/100 SEO Score • Core Web Vitals grün</div>
+      <div>✓ 14 Sprachen • PWA installierbar</div>
+      <div>✓ 3.200+ bewertete Guides • 4.8★</div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="booking-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div class="modal bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-6">
+      <div class="flex justify-between mb-4">
+        <div class="font-semibold">Tour / Guide buchen</div>
+        <button onclick="closeBooking()" class="text-xl leading-none">&times;</button>
+      </div>
+      <div id="booking-city-info" class="text-sm mb-4 p-3 bg-zinc-800 rounded-2xl"></div>
+      
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="text-xs text-zinc-400">Reisedatum</label>
+          <input id="book-date" type="date" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2" value="2026-07-15">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400">Personen</label>
+            <select id="book-pax" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2">
+              <option>1</option><option selected>2</option><option>3</option><option>4</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-zinc-400">Guide-Typ</label>
+            <select id="book-type" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2">
+              <option>Digitaler Guide (PDF + App)</option>
+              <option>Live Tour mit Local Guide</option>
+              <option>Self-Guided + Audio</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400">E-Mail für Bestätigung</label>
+          <input id="book-email" type="email" value="kunde@demo.de" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2">
+        </div>
+      </div>
+
+      <div class="mt-5 pt-4 border-t border-zinc-700 flex items-center justify-between text-sm">
+        <div>
+          <span class="text-zinc-400">Gesamt</span><br>
+          <span id="book-total" class="text-2xl font-semibold">€89</span>
+        </div>
+        <button onclick="confirmBooking()" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-2xl">Jetzt buchen &amp; bezahlen</button>
+      </div>
+      <div class="text-[10px] text-center text-zinc-500 mt-3">Demo: Buchung wird lokal gespeichert. Echter Produkt: Stripe + Booking.com API Sync.</div>
+    </div>
+  </div>
+
+  <script>
+    // Initial data - 1:1 faithful to description + expanded
+    let cities = [
+      {id:1, name:'Berlin', country:'Deutschland', guides:14, bookings:1240, price:29, lat:52.52, lng:13.405, rating:4.9, tags:['Street Art','History']},
+      {id:2, name:'Paris', country:'Frankreich', guides:18, bookings:1890, price:39, lat:48.8566, lng:2.3522, rating:4.8, tags:['Romance','Food']},
+      {id:3, name:'Rom', country:'Italien', guides:11, bookings:980, price:34, lat:41.9028, lng:12.4964, rating:4.7, tags:['Antike','Food']},
+      {id:4, name:'Barcelona', country:'Spanien', guides:9, bookings:760, price:27, lat:41.3851, lng:2.1734, rating:4.6, tags:['Beach','Gaudi']},
+      {id:5, name:'Amsterdam', country:'Niederlande', guides:8, bookings:610, price:25, lat:52.3676, lng:4.9041, rating:4.8, tags:['Cycling','Museums']},
+      {id:6, name:'Wien', country:'Österreich', guides:7, bookings:520, price:31, lat:48.2082, lng:16.3738, rating:4.9, tags:['Kultur','Kaffee']},
+      {id:7, name:'Lissabon', country:'Portugal', guides:10, bookings:690, price:22, lat:38.7223, lng:-9.1393, rating:4.5, tags:['Sunset','Tram']},
+      {id:8, name:'Prag', country:'Tschechien', guides:12, bookings:830, price:19, lat:50.0755, lng:14.4378, rating:4.7, tags:['Beer','Castle']},
+      {id:9, name:'Madrid', country:'Spanien', guides:6, bookings:410, price:26, lat:40.4168, lng:-3.7038, rating:4.4, tags:['Art','Tapas']},
+      {id:10, name:'München', country:'Deutschland', guides:9, bookings:710, price:33, lat:48.1351, lng:11.5820, rating:4.8, tags:['Beer','Alps']},
+    ];
+
+    let bookings = JSON.parse(localStorage.getItem('reise_bookings') || '[]');
+
+    function saveBookings() {
+      localStorage.setItem('reise_bookings', JSON.stringify(bookings));
+      updateBookingCount();
+    }
+
+    function updateBookingCount() {
+      const el = document.getElementById('booking-count');
+      if (el) el.textContent = `(${bookings.length})`;
+      const live = document.getElementById('live-bookings');
+      if (live) live.textContent = (1842 + bookings.length).toLocaleString('de-DE');
+    }
+
+    function filterCities() {
+      const q = (document.getElementById('search').value || '').toLowerCase();
+      const country = document.getElementById('country-filter').value;
+      const sort = document.getElementById('sort').value;
+
+      let filtered = cities.filter(c =>
+        (c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q) || c.tags.join(' ').toLowerCase().includes(q)) &&
+        (!country || c.country === country)
+      );
+
+      if (sort === 'bookings') filtered.sort((a,b)=>b.bookings-a.bookings);
+      else if (sort === 'guides') filtered.sort((a,b)=>b.guides-a.guides);
+      else if (sort === 'name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+
+      renderCities(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById('search').value = '';
+      document.getElementById('country-filter').value = '';
+      document.getElementById('sort').value = 'bookings';
+      renderCities(cities);
+    }
+
+    function renderCities(list) {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          ${list.map(ci => `
+            <div onclick="showCityDetail(${ci.id})" class="city-card bg-zinc-900 border border-zinc-800 hover:border-emerald-600 rounded-3xl p-5 cursor-pointer">
+              <div class="flex justify-between">
+                <div class="text-4xl mb-3">${ci.name === 'Berlin' ? '🇩🇪' : ci.name === 'Paris' ? '🇫🇷' : ci.name === 'Rom' ? '🇮🇹' : ci.name === 'Barcelona' ? '🇪🇸' : ci.name === 'Amsterdam' ? '🇳🇱' : ci.name === 'Wien' ? '🇦🇹' : ci.name === 'Lissabon' ? '🇵🇹' : ci.name === 'Prag' ? '🇨🇿' : ci.name === 'Madrid' ? '🇪🇸' : '🇩🇪'}</div>
+                <div class="text-right">
+                  <div class="text-xs text-zinc-400">ab</div>
+                  <div class="font-semibold text-emerald-400">€${ci.price}</div>
+                </div>
+              </div>
+              <div class="font-semibold text-xl">${ci.name}</div>
+              <div class="text-sm text-zinc-400">${ci.country} • ${ci.guides} Guides</div>
+              
+              <div class="mt-4 flex items-center justify-between text-sm">
+                <div class="flex items-center gap-1"><i class="fa-solid fa-users text-emerald-400"></i> <span class="font-medium">${ci.bookings.toLocaleString('de-DE')}</span> <span class="text-xs text-zinc-500">Buchungen</span></div>
+                <div class="guide-tag">★ ${ci.rating}</div>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-1">
+                ${ci.tags.map(t => `<span class="text-[10px] px-2 py-px bg-zinc-800 rounded">${t}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="text-xs text-center text-zinc-500 mt-4">Klicken Sie auf eine Stadt für interaktive Karte, detaillierten Guide und Buchung.</div>
+      `;
+    }
+
+    let currentCity = null;
+
+    function showCityDetail(id) {
+      currentCity = cities.find(x => x.id === id);
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="flex items-center gap-2 mb-3">
+          <button onclick="showCities()" class="text-emerald-400 hover:underline flex items-center gap-1 text-sm"><i class="fa-solid fa-arrow-left"></i> Alle Städte</button>
+        </div>
+        <div class="grid lg:grid-cols-5 gap-6">
+          <!-- Map + Info -->
+          <div class="lg:col-span-3">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+              <div class="px-5 pt-4 pb-2 flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-2xl">${currentCity.name} City Guide</div>
+                  <div class="text-sm text-zinc-400">${currentCity.country} • ${currentCity.guides} detaillierte Guides • ${currentCity.bookings} Buchungen</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-emerald-400 text-xl font-semibold">€${currentCity.price}</div>
+                  <div class="text-xs">pro Guide</div>
+                </div>
+              </div>
+              <div id="detail-map" class="h-80 w-full"></div>
+              <div class="p-4 bg-zinc-950 text-xs flex gap-4 text-zinc-400">
+                <div><i class="fa-solid fa-check text-emerald-400"></i> Offline Karten</div>
+                <div><i class="fa-solid fa-check text-emerald-400"></i> 120+ POIs</div>
+                <div><i class="fa-solid fa-check text-emerald-400"></i> Audio-Touren</div>
+                <div><i class="fa-solid fa-check text-emerald-400"></i> Booking Links</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-2 space-y-4">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+              <div class="font-medium mb-3">Highlights dieses Guides</div>
+              <ul class="text-sm space-y-2 text-zinc-300">
+                <li>✓ ${currentCity.tags[0]} Route (3–5 Std.)</li>
+                <li>✓ Lokale Geheimtipps &amp; Food Spots</li>
+                <li>✓ Interaktive Karte + AR-Overlay</li>
+                <li>✓ Saisonale Events &amp; Festivals</li>
+                <li>✓ Direkt buchbare Hotels via Partner</li>
+              </ul>
+              <button onclick="openBooking(${currentCity.id})" class="mt-5 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-semibold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-calendar-plus"></i> <span>Guide + Tour buchen</span>
+              </button>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-sm">
+              <div class="flex justify-between text-xs mb-2"><span class="text-zinc-400">Partner Revenue</span><span class="text-emerald-400">12% CPA</span></div>
+              <div class="h-2 bg-zinc-800 rounded"><div class="h-2 w-[78%] bg-gradient-to-r from-emerald-400 to-teal-400 rounded"></div></div>
+              <div class="mt-3 text-xs">Durchschnittlich 3,4 Hotel-/Aktivitätsbuchungen pro Guide-Verkauf</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const mapEl = document.getElementById('detail-map');
+        if (!mapEl) return;
+        const map = L.map('detail-map').setView([currentCity.lat, currentCity.lng], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(map);
+        L.marker([currentCity.lat, currentCity.lng]).addTo(map)
+          .bindPopup(`<b>${currentCity.name}</b><br>City Guide Zentrum`).openPopup();
+      }, 120);
+    }
+
+    function openBooking(id) {
+      const ci = cities.find(x => x.id === id) || currentCity;
+      if (!ci) return;
+      currentCity = ci;
+
+      document.getElementById('booking-city-info').innerHTML = `
+        <div class="font-semibold">${ci.name}, ${ci.country}</div>
+        <div class="text-xs text-zinc-400">${ci.guides} Guides • ab €${ci.price} • ★${ci.rating}</div>
+      `;
+      document.getElementById('book-total').textContent = '€' + ci.price;
+
+      document.getElementById('booking-modal').classList.remove('hidden');
+      document.getElementById('booking-modal').classList.add('flex');
+    }
+
+    function closeBooking() {
+      const m = document.getElementById('booking-modal');
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    }
+
+    function confirmBooking() {
+      if (!currentCity) return;
+      const date = document.getElementById('book-date').value;
+      const pax = document.getElementById('book-pax').value;
+      const type = document.getElementById('book-type').value;
+      const email = document.getElementById('book-email').value || 'demo@demo.de';
+
+      const booking = {
+        id: Date.now(),
+        cityId: currentCity.id,
+        city: currentCity.name,
+        country: currentCity.country,
+        date, pax: parseInt(pax), type, email,
+        amount: currentCity.price,
+        status: 'confirmed',
+        created: new Date().toISOString()
+      };
+      bookings.unshift(booking);
+      saveBookings();
+
+      closeBooking();
+      alert(`Buchung bestätigt!\n\n${currentCity.name} • ${date}\n${pax} Person(en) • ${type}\n\nBestätigung wurde an ${email} gesendet (Demo).\n\nIm echten Produkt: Stripe Zahlung, Kalender-Sync, Booking.com Affiliate Tracking, PDF Guide sofort verfügbar.`);
+
+      // refresh if on bookings view
+      if (document.getElementById('content').innerHTML.includes('Buchungen')) {
+        showBookings();
+      }
+    }
+
+    function showBookings() {
+      const c = document.getElementById('content');
+      if (bookings.length === 0) {
+        c.innerHTML = `<div class="text-center py-12 text-zinc-400">Noch keine Buchungen in dieser Demo. Buche über eine Stadt-Karte.</div>`;
+        return;
+      }
+      c.innerHTML = `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden">
+          <div class="px-5 py-4 border-b border-zinc-800 flex justify-between">
+            <div class="font-semibold">Aktuelle Buchungen (Demo – localStorage persistent)</div>
+            <button onclick="exportBookings()" class="text-xs px-3 py-1 border border-zinc-700 rounded hover:bg-zinc-800">CSV Export</button>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-zinc-950 text-xs text-zinc-400">
+              <tr>
+                <th class="text-left p-4">Datum</th><th class="text-left">Stadt</th><th>Typ</th><th class="text-center">Pax</th><th>Betrag</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bookings.map(b => `
+                <tr class="border-t border-zinc-800">
+                  <td class="p-4 font-mono text-xs">${b.date}</td>
+                  <td class="font-medium">${b.city} <span class="text-zinc-500 text-xs">(${b.country})</span></td>
+                  <td class="text-xs">${b.type}</td>
+                  <td class="text-center">${b.pax}</td>
+                  <td class="font-semibold">€${b.amount}</td>
+                  <td><span class="px-2 py-px text-[10px] rounded bg-emerald-900/60 text-emerald-400">${b.status}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="text-[10px] mt-3 text-zinc-500">Diese Buchungen sind persistent im Browser (localStorage). Der Admin kann sie einsehen &amp; verwalten. Im echten Produkt: CRM-Sync + Provisionen.</div>
+      `;
+    }
+
+    function exportBookings() {
+      const csv = 'date,city,country,pax,type,amount,email\n' + bookings.map(b => `${b.date},${b.city},${b.country},${b.pax},"${b.type}",${b.amount},${b.email}`).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'cityguides-bookings.csv';
+      a.click();
+    }
+
+    function showMap() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-2">
+          <div id="map-full" class="h-[560px] w-full rounded-3xl overflow-hidden"></div>
+        </div>
+        <div class="text-center text-xs text-zinc-500 mt-2">Alle 10 Städte mit Live-Markern. Klicken Sie auf Marker für Quick-Info + Buchung.</div>
+      `;
+      setTimeout(() => {
+        const map = L.map('map-full').setView([49, 10], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        cities.forEach(ci => {
+          const m = L.marker([ci.lat, ci.lng]).addTo(map);
+          m.bindPopup(`
+            <b>${ci.name}</b><br>
+            ${ci.guides} Guides • ${ci.bookings} Buchungen<br>
+            <button onclick="quickBookFromMap(${ci.id})" style="margin-top:6px;background:#10b981;color:#000;padding:3px 12px;border-radius:6px;font-size:12px;border:none;cursor:pointer;">Jetzt buchen</button>
+          `);
+        });
+      }, 80);
+    }
+
+    window.quickBookFromMap = function(id) {
+      // close any popup
+      document.querySelectorAll('.leaflet-popup').forEach(el => el.remove());
+      openBooking(id);
+    };
+
+    // ============ FULL SOVEREIGN ADMIN ============
+    let adminCities = [...cities]; // copy for admin mutations
+
+    function showAdmin() {
+      const c = document.getElementById('content');
+      c.innerHTML = `
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-xl">CityGuides Admin Panel</div>
+            <div class="text-xs text-emerald-400">Souveränität – Vollzugriff für den Käufer / Betreiber</div>
+          </div>
+          <button onclick="addNewCity()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-sm font-medium text-black rounded-2xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> Neue Stadt / Guide hinzufügen</button>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <!-- Cities Management -->
+          <div class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="text-xs uppercase tracking-widest text-zinc-400 mb-3">Städte &amp; Guides verwalten</div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead><tr class="text-xs text-zinc-400 border-b border-zinc-700">
+                  <th class="text-left pb-2">Stadt</th><th>Land</th><th class="text-center">Guides</th><th class="text-center">Buchungen</th><th>Preis</th><th></th>
+                </tr></thead>
+                <tbody id="admin-cities-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Stats + Revenue -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 flex flex-col">
+            <div class="text-xs uppercase tracking-widest text-zinc-400 mb-3">Live Analytics (Demo)</div>
+            <div class="space-y-4 flex-1">
+              <div class="flex justify-between"><span>Monatsumsatz (Ads + CPA)</span><span class="font-semibold">€1.950</span></div>
+              <div class="flex justify-between"><span>Conversion Rate</span><span class="font-semibold">4.8%</span></div>
+              <div class="flex justify-between"><span>Top Stadt</span><span class="font-semibold">Paris (1.890)</span></div>
+              <div class="flex justify-between"><span>Offene Leads</span><span class="font-semibold text-emerald-400">27</span></div>
+            </div>
+            <button onclick="simulateRevenue()" class="mt-4 text-xs py-2 border border-zinc-700 rounded-xl hover:bg-zinc-800">Simuliere 3 neue Buchungen + Revenue</button>
+          </div>
+        </div>
+
+        <!-- Bookings in Admin -->
+        <div class="mt-5 bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+          <div class="flex justify-between mb-3">
+            <div class="text-xs uppercase tracking-widest text-zinc-400">Buchungen &amp; Leads</div>
+            <button onclick="clearAllBookings()" class="text-xs text-red-400 hover:text-red-300">Alle Demo-Buchungen löschen</button>
+          </div>
+          <div id="admin-bookings"></div>
+        </div>
+
+        <div class="text-[10px] mt-4 text-center text-zinc-500">Alle Änderungen werden in localStorage gespeichert. Exportiere Daten für echte CRM. Dies ist der vollständige Betrieb, den der Käufer erhält.</div>
+      `;
+
+      renderAdminCities();
+      renderAdminBookings();
+    }
+
+    function renderAdminCities() {
+      const tbody = document.getElementById('admin-cities-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = adminCities.map(ci => `
+        <tr class="border-t border-zinc-800 hover:bg-zinc-950">
+          <td class="py-2 font-medium">${ci.name}</td>
+          <td class="text-zinc-400">${ci.country}</td>
+          <td class="text-center"><input type="number" value="${ci.guides}" onchange="updateCityField(${ci.id}, 'guides', this.value)" class="w-14 bg-zinc-950 border border-zinc-700 text-center rounded"></td>
+          <td class="text-center"><input type="number" value="${ci.bookings}" onchange="updateCityField(${ci.id}, 'bookings', this.value)" class="w-20 bg-zinc-950 border border-zinc-700 text-center rounded"></td>
+          <td><input type="number" value="${ci.price}" onchange="updateCityField(${ci.id}, 'price', this.value)" class="w-14 bg-zinc-950 border border-zinc-700 text-center rounded"> €</td>
+          <td class="text-right">
+            <button onclick="editCity(${ci.id})" class="px-2 py-1 text-xs border border-zinc-700 rounded hover:bg-zinc-800 mr-1">Edit</button>
+            <button onclick="deleteCity(${ci.id})" class="px-2 py-1 text-xs border border-red-900/60 text-red-400 rounded hover:bg-red-950">Löschen</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateCityField(id, field, val) {
+      const ci = adminCities.find(x => x.id === id);
+      if (!ci) return;
+      ci[field] = parseInt(val) || 0;
+      // also update main list
+      const main = cities.find(x => x.id === id);
+      if (main) main[field] = ci[field];
+      localStorage.setItem('reise_cities', JSON.stringify(adminCities));
+      // refresh main view if visible
+      if (!document.getElementById('content').innerHTML.includes('Admin')) {
+        filterCities();
+      }
+    }
+
+    function editCity(id) {
+      const ci = adminCities.find(x => x.id === id);
+      const newName = prompt('Stadtname:', ci.name);
+      if (newName) ci.name = newName;
+      const newCountry = prompt('Land:', ci.country);
+      if (newCountry) ci.country = newCountry;
+      localStorage.setItem('reise_cities', JSON.stringify(adminCities));
+      renderAdminCities();
+    }
+
+    function deleteCity(id) {
+      if (!confirm('Stadt wirklich löschen?')) return;
+      adminCities = adminCities.filter(x => x.id !== id);
+      cities = cities.filter(x => x.id !== id);
+      localStorage.setItem('reise_cities', JSON.stringify(adminCities));
+      renderAdminCities();
+    }
+
+    function addNewCity() {
+      const name = prompt('Name der neuen Stadt:', 'Kopenhagen');
+      if (!name) return;
+      const country = prompt('Land:', 'Dänemark') || 'Dänemark';
+      const newC = {
+        id: Date.now(),
+        name, country,
+        guides: parseInt(prompt('Anzahl Guides:', '7') || '7'),
+        bookings: parseInt(prompt('Initiale Buchungen:', '120') || '120'),
+        price: parseInt(prompt('Preis ab:', '28') || '28'),
+        lat: 55.6761, lng: 12.5683,
+        rating: 4.6,
+        tags: ['Nordic','Design']
+      };
+      adminCities.push(newC);
+      cities.push({...newC});
+      localStorage.setItem('reise_cities', JSON.stringify(adminCities));
+      renderAdminCities();
+      alert('Neue Stadt hinzugefügt. Sie erscheint sofort im Portal.');
+    }
+
+    function renderAdminBookings() {
+      const el = document.getElementById('admin-bookings');
+      if (!el) return;
+      if (bookings.length === 0) {
+        el.innerHTML = `<div class="text-sm text-zinc-400">Noch keine Buchungen.</div>`;
+        return;
+      }
+      el.innerHTML = `
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-zinc-400"><th class="text-left">Datum</th><th>Stadt</th><th>Typ</th><th>Email</th><th>Betrag</th><th></th></tr></thead>
+          <tbody>
+            ${bookings.map((b,i) => `
+              <tr class="border-t border-zinc-800">
+                <td class="py-1.5">${b.date}</td>
+                <td>${b.city}</td>
+                <td class="text-xs">${b.type.substring(0,22)}...</td>
+                <td class="text-xs text-zinc-400">${b.email}</td>
+                <td>€${b.amount}</td>
+                <td><button onclick="deleteBooking(${i})" class="text-red-400 text-xs">stornieren</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function deleteBooking(idx) {
+      bookings.splice(idx,1);
+      saveBookings();
+      renderAdminBookings();
+    }
+
+    function clearAllBookings() {
+      if (confirm('Alle Demo-Buchungen löschen?')) {
+        bookings = [];
+        saveBookings();
+        renderAdminBookings();
+      }
+    }
+
+    function simulateRevenue() {
+      // add 3 random bookings
+      for (let i=0; i<3; i++) {
+        const ci = cities[Math.floor(Math.random()*cities.length)];
+        bookings.unshift({
+          id: Date.now()+i,
+          cityId: ci.id, city: ci.name, country: ci.country,
+          date: '2026-06-' + (10 + i),
+          pax: 1 + Math.floor(Math.random()*3),
+          type: 'Digitaler Guide (PDF + App)',
+          email: 'lead'+i+'@demo.de',
+          amount: ci.price,
+          status: 'confirmed',
+          created: new Date().toISOString()
+        });
+      }
+      saveBookings();
+      renderAdminBookings();
+      alert('3 neue Buchungen + Umsatz simuliert. Analytics & Buchungen aktualisiert.');
+    }
+
+    function loadPersisted() {
+      const saved = localStorage.getItem('reise_cities');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length) {
+            cities = parsed;
+            adminCities = [...parsed];
+          }
+        } catch(e){}
+      }
+    }
+
+    function initNav() {
+      // simple active state handlers could be added; for brevity click handlers already wired
+    }
+
+    function init() {
+      loadPersisted();
+      updateBookingCount();
+
+      // initial render
+      const c = document.getElementById('content');
+      renderCities(cities);
+
+      // wire search etc already on inputs
+      document.getElementById('search').addEventListener('input', filterCities);
+      document.getElementById('country-filter').addEventListener('change', filterCities);
+      document.getElementById('sort').addEventListener('change', filterCities);
+
+      initNav();
+
+      // seed a couple bookings if first time
+      if (bookings.length === 0) {
+        bookings = [
+          {id:1718001, cityId:2, city:'Paris', country:'Frankreich', date:'2026-07-02', pax:2, type:'Live Tour mit Local Guide', email:'demo@beispiel.de', amount:78, status:'confirmed', created:'2026-05-28T10:11:00Z'},
+          {id:1718002, cityId:1, city:'Berlin', country:'Deutschland', date:'2026-06-19', pax:1, type:'Digitaler Guide (PDF + App)', email:'max@mustermann.de', amount:29, status:'confirmed', created:'2026-05-29T09:40:00Z'}
+        ];
+        saveBookings();
+      }
+
+      // keyboard hint
+      console.log('%c[Reise CityGuides] Full sovereign demo ready. Maps, real booking flow with persistence, complete Admin CRUD for cities & bookings. 1:1 faithful + expanded for buyer ownership.', 'color:#166534');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

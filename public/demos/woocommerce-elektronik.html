@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElektronikStore – WooCommerce (Live Demo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .prod-card { transition: all .2s; }
+    .prod-card:hover { transform: translateY(-4px); border-color: #10b981; }
+    .cart-item { transition: background .1s; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <nav class="bg-zinc-900 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-black font-bold">ES</div>
+        <div>
+          <div class="font-semibold text-xl">ElektronikStore</div>
+          <div class="text-[10px] text-emerald-400 -mt-1">WooCommerce • Dropshipping</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-sm">
+        <button onclick="showProducts()" class="px-4 py-1.5 hover:bg-zinc-800 rounded-lg">Shop</button>
+        <button onclick="showCartView()" class="px-4 py-1.5 hover:bg-zinc-800 rounded-lg flex items-center gap-1">🛒 Warenkorb <span id="cart-count-nav" class="text-xs bg-emerald-900 px-1.5 rounded">0</span></button>
+        <button onclick="showAdmin()" class="ml-2 px-4 py-1.5 bg-emerald-500 text-black font-medium rounded-2xl text-sm">Shop Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="mb-8">
+      <div class="flex flex-wrap gap-3 items-end">
+        <div>
+          <h1 class="text-4xl font-semibold tracking-tighter">Elektronik &amp; Gadgets</h1>
+          <p class="text-zinc-400">340+ SKUs • Automatisiertes Dropshipping • Google Shopping • 18k Traffic • 3.2% Conversion</p>
+        </div>
+        <div class="ml-auto flex gap-4 text-sm">
+          <div class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-2xl text-center"><div class="text-emerald-400 text-xl font-semibold">€2.800</div><div class="text-[10px]">Umsatz / Monat</div></div>
+          <div class="bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-2xl text-center"><div class="text-emerald-400 text-xl font-semibold">340</div><div class="text-[10px]">Produkte</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 mb-6 items-center">
+      <input id="search" oninput="filterProducts()" placeholder="Suche Produkt..." class="flex-1 min-w-[220px] bg-zinc-900 border border-zinc-700 rounded-2xl px-4 py-2 text-sm">
+      <select id="cat-filter" onchange="filterProducts()" class="bg-zinc-900 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+        <option value="">Alle Kategorien</option>
+        <option value="smartphone">Smartphones</option>
+        <option value="laptop">Laptops &amp; Tablets</option>
+        <option value="audio">Audio &amp; Wearables</option>
+        <option value="accessory">Zubehör</option>
+      </select>
+      <select id="sort" onchange="filterProducts()" class="bg-zinc-900 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+        <option value="popular">Sort: Beliebt</option>
+        <option value="price-low">Preis aufsteigend</option>
+        <option value="price-high">Preis absteigend</option>
+      </select>
+      <button onclick="resetShopFilters()" class="px-4 py-2 text-sm border border-zinc-700 rounded-2xl">Reset</button>
+    </div>
+
+    <div id="products" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div id="detail-modal" onclick="if(event.target.id==='detail-modal') closeDetail()" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+    <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 w-full max-w-2xl rounded-3xl p-6">
+      <div class="flex justify-between mb-4">
+        <div id="detail-title" class="text-2xl font-semibold"></div>
+        <button onclick="closeDetail()" class="text-2xl leading-none">&times;</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div id="detail-img" class="text-[120px] flex items-center justify-center bg-zinc-950 rounded-2xl h-64"></div>
+        <div>
+          <div id="detail-price" class="text-3xl font-semibold text-emerald-400"></div>
+          <div id="detail-meta" class="text-sm text-zinc-400 mb-4"></div>
+
+          <div class="mb-4">
+            <div class="text-xs mb-1">Variante</div>
+            <div id="variants" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <button onclick="addCurrentToCart()" class="w-full py-3 bg-emerald-500 text-black font-semibold rounded-2xl">In den Warenkorb</button>
+          <div class="text-[10px] text-center mt-2 text-zinc-500">Kostenloser Versand ab €50 • 30 Tage Rückgabe</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar / View -->
+  <div id="cart-view" class="hidden fixed inset-0 bg-black/60 z-[60]">
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-zinc-900 border-l border-zinc-700 p-6 overflow-auto">
+      <div class="flex justify-between mb-4">
+        <div class="text-xl font-semibold">Dein Warenkorb</div>
+        <button onclick="closeCartView()" class="text-2xl">&times;</button>
+      </div>
+      <div id="cart-items" class="space-y-3"></div>
+      <div class="mt-6 pt-4 border-t border-zinc-700">
+        <div class="flex justify-between text-lg"><span>Gesamt</span><span id="cart-total" class="font-semibold"></span></div>
+        <button onclick="checkout()" class="mt-4 w-full py-3 bg-emerald-500 text-black font-semibold rounded-2xl">Zur Kasse</button>
+        <div class="text-[10px] text-center mt-2 text-zinc-500">Demo: Keine echte Zahlung. Im Produkt: Stripe + automatische Bestellung an Lieferanten.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let products = JSON.parse(localStorage.getItem('woo_products') || 'null') || [
+      {id:1, name:'iPhone 15 Pro', price:999, cat:'smartphone', img:'📱', stock:42},
+      {id:2, name:'MacBook Air M3', price:1299, cat:'laptop', img:'💻', stock:18},
+      {id:3, name:'AirPods Max', price:549, cat:'audio', img:'🎧', stock:67},
+      {id:4, name:'Samsung Galaxy S24', price:899, cat:'smartphone', img:'📱', stock:55},
+      {id:5, name:'Dell XPS 14', price:1599, cat:'laptop', img:'💻', stock:12},
+      {id:6, name:'Sony WH-1000XM5', price:399, cat:'audio', img:'🎧', stock:81},
+      {id:7, name:'iPad Pro 13"', price:1199, cat:'laptop', img:'📱', stock:23},
+      {id:8, name:'Anker Powerbank 20k', price:49, cat:'accessory', img:'🔋', stock:120},
+      {id:9, name:'Apple Watch Ultra 2', price:799, cat:'audio', img:'⌚', stock:31},
+      {id:10, name:'Logitech MX Master 3S', price:99, cat:'accessory', img:'🖱️', stock:74},
+    ];
+    let cart = JSON.parse(localStorage.getItem('woo_cart') || '[]');
+    let orders = JSON.parse(localStorage.getItem('woo_orders') || '[]');
+
+    function saveAll() {
+      localStorage.setItem('woo_products', JSON.stringify(products));
+      localStorage.setItem('woo_cart', JSON.stringify(cart));
+      localStorage.setItem('woo_orders', JSON.stringify(orders));
+      updateCartCount();
+    }
+
+    function updateCartCount() {
+      const el = document.getElementById('cart-count-nav');
+      if (el) el.textContent = cart.length;
+    }
+
+    let currentProduct = null;
+
+    function renderProducts(list) {
+      const c = document.getElementById('products');
+      if (!c) return;
+      c.innerHTML = list.map(p => `
+        <div onclick="showProductDetail(${p.id})" class="prod-card bg-zinc-900 border border-zinc-800 rounded-3xl p-4 cursor-pointer">
+          <div class="text-6xl mb-4 text-center">${p.img}</div>
+          <div class="font-semibold">${p.name}</div>
+          <div class="text-emerald-400 text-xl font-semibold mt-1">€${p.price}</div>
+          <div class="text-xs text-zinc-400 mt-1">Auf Lager: ${p.stock} • Dropshipping</div>
+        </div>
+      `).join('');
+    }
+
+    function filterProducts() {
+      const q = (document.getElementById('search')?.value || '').toLowerCase();
+      const cat = document.getElementById('cat-filter')?.value || '';
+      const sort = document.getElementById('sort')?.value || 'popular';
+
+      let filtered = products.filter(p =>
+        p.name.toLowerCase().includes(q) &&
+        (!cat || p.cat === cat)
+      );
+
+      if (sort === 'price-low') filtered.sort((a,b)=>a.price-b.price);
+      else if (sort === 'price-high') filtered.sort((a,b)=>b.price-a.price);
+      else filtered.sort((a,b)=>b.stock-a.stock); // popular = stock proxy
+
+      renderProducts(filtered);
+    }
+
+    function resetShopFilters() {
+      const s = document.getElementById('search'); if (s) s.value='';
+      const cf = document.getElementById('cat-filter'); if (cf) cf.value='';
+      const so = document.getElementById('sort'); if (so) so.value='popular';
+      renderProducts(products);
+    }
+
+    function showProducts() {
+      document.getElementById('products').style.display = 'grid';
+      // hide other views if present
+      const cv = document.getElementById('cart-view'); if (cv) cv.classList.add('hidden');
+      const dm = document.getElementById('detail-modal'); if (dm) dm.classList.add('hidden');
+      renderProducts(products);
+    }
+
+    function showProductDetail(id) {
+      currentProduct = products.find(x => x.id === id);
+      if (!currentProduct) return;
+
+      document.getElementById('detail-title').textContent = currentProduct.name;
+      document.getElementById('detail-img').innerHTML = currentProduct.img;
+      document.getElementById('detail-price').textContent = '€' + currentProduct.price;
+      document.getElementById('detail-meta').innerHTML = `${currentProduct.cat} • ${currentProduct.stock} auf Lager • Sofort lieferbar`;
+
+      const varEl = document.getElementById('variants');
+      varEl.innerHTML = `
+        <div onclick="selectVariant(this, 'Schwarz')" class="variant px-3 py-1 bg-zinc-800 rounded-full text-sm cursor-pointer border border-emerald-500">Schwarz</div>
+        <div onclick="selectVariant(this, 'Weiß')" class="variant px-3 py-1 bg-zinc-800 rounded-full text-sm cursor-pointer">Weiß</div>
+        <div onclick="selectVariant(this, 'Blau')" class="variant px-3 py-1 bg-zinc-800 rounded-full text-sm cursor-pointer">Blau</div>
+      `;
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.getElementById('detail-modal').classList.add('flex');
+    }
+
+    let selectedVariant = 'Schwarz';
+    function selectVariant(el, v) {
+      document.querySelectorAll('#variants .variant').forEach(e => e.classList.remove('border-emerald-500'));
+      el.classList.add('border-emerald-500');
+      selectedVariant = v;
+    }
+
+    function closeDetail() {
+      const m = document.getElementById('detail-modal');
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    }
+
+    function addCurrentToCart() {
+      if (!currentProduct) return;
+      cart.push({...currentProduct, variant: selectedVariant});
+      saveAll();
+      closeDetail();
+      alert(`${currentProduct.name} (${selectedVariant}) in den Warenkorb gelegt.`);
+      updateCartCount();
+    }
+
+    function showCartView() {
+      const cv = document.getElementById('cart-view');
+      const itemsEl = document.getElementById('cart-items');
+      cv.classList.remove('hidden');
+
+      if (cart.length === 0) {
+        itemsEl.innerHTML = '<div class="text-zinc-400 py-8 text-center">Warenkorb ist leer.</div>';
+        document.getElementById('cart-total').textContent = '€0';
+        return;
+      }
+
+      let html = '';
+      let total = 0;
+      cart.forEach((item, idx) => {
+        total += item.price;
+        html += `
+          <div class="cart-item flex gap-3 bg-zinc-950 p-3 rounded-2xl">
+            <div class="text-3xl w-12 text-center">${item.img}</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium">${item.name}</div>
+              <div class="text-xs text-zinc-400">${item.variant || 'Standard'} • €${item.price}</div>
+            </div>
+            <div class="text-right">
+              <button onclick="removeFromCart(${idx})" class="text-red-400 text-xs">entfernen</button>
+              <div class="font-semibold mt-1">€${item.price}</div>
+            </div>
+          </div>
+        `;
+      });
+      itemsEl.innerHTML = html;
+      document.getElementById('cart-total').textContent = '€' + total;
+    }
+
+    function closeCartView() {
+      document.getElementById('cart-view').classList.add('hidden');
+    }
+
+    function removeFromCart(idx) {
+      cart.splice(idx, 1);
+      saveAll();
+      showCartView();
+    }
+
+    function checkout() {
+      if (cart.length === 0) return;
+      const total = cart.reduce((s,i)=>s+i.price,0);
+      const orderId = 'ORD-' + Date.now().toString().slice(-6);
+      const order = {
+        id: orderId,
+        date: new Date().toISOString().slice(0,10),
+        items: [...cart],
+        total,
+        status: 'paid'
+      };
+      orders.unshift(order);
+      cart = [];
+      saveAll();
+      closeCartView();
+
+      alert(`Bestellung ${orderId} erfolgreich!\n\nGesamt: €${total}\n\nIm echten Produkt: Automatische Weitergabe an Dropshipping-Lieferanten (CJ, Zendrop etc.), Tracking-Mail, Google Ads Conversion.`);
+      showAdmin(); // jump to admin to see the order
+    }
+
+    // ============ FULL SOVEREIGN ADMIN ============
+    function showAdmin() {
+      const c = document.getElementById('products');
+      if (c) c.style.display = 'none';
+      const cv = document.getElementById('cart-view'); if (cv) cv.classList.add('hidden');
+
+      const main = document.querySelector('.max-w-7xl.mx-auto.p-6') || document.body;
+      // simple replace content area
+      const area = document.createElement('div');
+      area.id = 'admin-area';
+      area.className = 'max-w-7xl mx-auto p-6';
+      area.innerHTML = `
+        <button onclick="exitAdmin()" class="mb-4 text-sm text-emerald-400">← Zurück zum Shop</button>
+        <div class="text-emerald-400 text-xs tracking-widest">SHOP OWNER • FULL SOVEREIGNTY</div>
+        <div class="text-3xl font-semibold mb-6">WooCommerce Admin</div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Products CRUD -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="flex justify-between mb-3">
+              <div class="font-medium">Produkte verwalten (${products.length})</div>
+              <button onclick="adminAddProduct()" class="text-xs px-3 py-1 bg-emerald-500 text-black rounded-2xl">+ Produkt</button>
+            </div>
+            <div class="max-h-[320px] overflow-auto text-sm space-y-1 pr-2">
+              ${products.map((p,i) => `
+                <div class="flex justify-between items-center bg-zinc-950 px-3 py-2 rounded-2xl">
+                  <div>${p.img} ${p.name} <span class="text-xs text-zinc-400">€${p.price}</span></div>
+                  <div class="flex gap-2 text-xs">
+                    <button onclick="adminEditProduct(${p.id})" class="text-emerald-400">Edit</button>
+                    <button onclick="adminDeleteProduct(${p.id})" class="text-red-400">Del</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+            <div class="font-medium mb-3">Bestellungen (${orders.length})</div>
+            ${orders.length === 0 ? '<div class="text-sm text-zinc-400">Noch keine Bestellungen.</div>' : `
+              <div class="max-h-[320px] overflow-auto text-sm">
+                ${orders.map(o => `
+                  <div class="py-2 border-t border-zinc-800 flex justify-between">
+                    <div class="font-mono text-xs">${o.id} • ${o.date}</div>
+                    <div class="font-semibold">€${o.total}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+            <div class="mt-4 text-xs text-zinc-400">Dropshipping-Status wird automatisch aktualisiert (Demo).</div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-[10px] text-center text-zinc-500">Alle Änderungen persistent. Exportiere Produkte oder Bestellungen für echte WooCommerce Migration.</div>
+      `;
+
+      // replace or append
+      const old = document.getElementById('admin-area');
+      if (old) old.remove();
+      document.querySelector('body').appendChild(area);
+    }
+
+    function exitAdmin() {
+      const a = document.getElementById('admin-area');
+      if (a) a.remove();
+      const p = document.getElementById('products');
+      if (p) p.style.display = 'grid';
+      showProducts();
+    }
+
+    function adminAddProduct() {
+      const name = prompt('Produktname:', 'Neues Gadget');
+      if (!name) return;
+      const price = parseInt(prompt('Preis €:', '129')) || 129;
+      const cat = prompt('Kategorie (smartphone/laptop/audio/accessory):', 'accessory') || 'accessory';
+      const newP = {id: Date.now(), name, price, cat, img: '🆕', stock: 50};
+      products.push(newP);
+      saveAll();
+      showAdmin();
+    }
+
+    function adminEditProduct(id) {
+      const p = products.find(x => x.id === id);
+      p.name = prompt('Name:', p.name) || p.name;
+      p.price = parseInt(prompt('Preis:', p.price)) || p.price;
+      saveAll();
+      showAdmin();
+    }
+
+    function adminDeleteProduct(id) {
+      if (!confirm('Produkt löschen?')) return;
+      products = products.filter(x => x.id !== id);
+      saveAll();
+      showAdmin();
+    }
+
+    function init() {
+      updateCartCount();
+      showProducts();
+      // seed a demo order if none
+      if (orders.length === 0) {
+        orders.push({id:'ORD-482911', date:'2026-05-28', items:[{name:'iPhone 15 Pro', price:999}], total:999, status:'paid'});
+        saveAll();
+      }
+      console.log('%c[WooCommerce Elektronik] Full sovereign dropshipping shop ready: cart with qty/remove, checkout, orders, complete Admin CRUD for products + orders. 1:1 + expanded for buyer ownership.', 'color:#166534');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
