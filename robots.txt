@@ -1,0 +1,88 @@
+# robots.txt für www.selinova-tech.at
+# Selinova-TECH | Professionelle Webseiten kaufen & mieten
+# Erzeugt durch Selinova-AI – Production-Ready, SEO-optimiert, sicherheitskonform
+# Stand: 2026-06-06 | Version 1.0
+
+Sitemap: https://www.selinova-tech.at/sitemap.xml
+
+# ============================================
+# Suchmaschinen-Crawler (Googlebot, Bingbot, etc.)
+# Voller Zugriff auf alle relevanten öffentlichen Inhalte für maximale Sichtbarkeit und SEO-Performance
+User-agent: *
+Allow: /
+
+# Blockierung sensibler und interner Pfade (Security Best Practice)
+# Verhindert Crawling von Admin-Bereichen, Backups, Logs und sensiblen Dateien
+Disallow: /admin/
+Disallow: /administrator/
+Disallow: /login/
+Disallow: /dashboard/
+Disallow: /user/
+Disallow: /account/
+Disallow: /private/
+Disallow: /backup/
+Disallow: /backups/
+Disallow: /logs/
+Disallow: /log/
+Disallow: /tmp/
+Disallow: /temp/
+Disallow: /cache/
+Disallow: /cgi-bin/
+Disallow: /includes/
+Disallow: /config/
+Disallow: /.env
+Disallow: /.git/
+Disallow: /.svn/
+Disallow: /vendor/
+Disallow: /node_modules/
+Disallow: /wp-admin/
+Disallow: /wp-includes/
+Disallow: /wp-content/cache/
+Disallow: /wp-content/backup-db/
+Disallow: /api/
+Disallow: /_next/          # Next.js interne Assets (falls verwendet)
+Disallow: /.well-known/    # Technische Meta-Dateien (optional anpassbar)
+
+# Hinweis: Keine pauschale Blockade von Query-Parametern, um dynamische Inhalte nicht zu beeinträchtigen.
+# Bei Duplicate-Content-Problemen: Spezifische Parameter disallown, z. B. Disallow: /*?utm_source
+
+# ============================================
+# AI-Training-Crawler blockieren (Content Protection)
+# Schützt geistiges Eigentum und verhindert unautorisierte Nutzung für KI-Modelle
+# Empfohlen für professionelle Business-Sites 2026
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# Zusätzliche Bots bei Bedarf ergänzen (z. B. für zukünftige Crawler)
+# User-agent: BeispielBot
+# Disallow: /
+
+# ============================================
+# Ende der robots.txt
+# Platzierung: Root-Verzeichnis des Webservers (https://www.selinova-tech.at/robots.txt)
+# Nach Upload: Google Search Console & Bing Webmaster Tools neu einreichen / validieren
+# Empfehlung: Parallel eine vollständige XML-Sitemap bereitstellen und in der Google Search Console einreichen
